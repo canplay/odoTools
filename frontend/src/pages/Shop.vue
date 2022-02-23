@@ -7,7 +7,7 @@
 
       <q-card-section style="background-color: rgba(0, 0, 0, 0.8)">
         <q-scroll-area class="text-white" style="height: 400px">
-          123
+          234
         </q-scroll-area>
       </q-card-section>
     </q-card>
@@ -19,7 +19,7 @@ import { defineComponent } from "vue";
 import comptoolbar from "src/components/compToolbar.vue";
 
 export default defineComponent({
-  name: "PageIndex",
+  name: "PageShop",
 
   setup() {},
 

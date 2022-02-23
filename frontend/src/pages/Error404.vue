@@ -5,7 +5,7 @@
     <div>
       <div style="font-size: 30vh">404</div>
 
-      <div class="text-h2" style="opacity: 0.4">Oops. Nothing here...</div>
+      <div class="text-h2" style="opacity: 0.4">{{ $t("error404") }}</div>
 
       <q-btn
         class="q-mt-xl"
@@ -13,7 +13,7 @@
         text-color="blue"
         unelevated
         to="/"
-        label="Go Home"
+        :label="$t('back')"
         no-caps
       />
     </div>
@@ -24,6 +24,6 @@
 import { defineComponent } from "vue";
 
 export default defineComponent({
-  name: "Error404",
+  name: "error_404",
 });
 </script>

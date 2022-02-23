@@ -6,3 +6,20 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+log = "*"
+log4rs = "*"
+futures = "*"
+actix-web = "*"
+actix-cors = "*"
+actix-session = "*"
+serde = "*"
+serde_json = "*"
+once_cell = "*"
+chrono = { version = "*", features = ["serde"] }
+uuid = { version = "*", features = ["v4"] }
+blake2 = "0.10.0"
+urlencoding = "*"
+reqwest = { version = "0.10.10", features = ["cookies", "gzip", "json"] }
+anyhow = "*"
+sha256 = "*"
+mongodb = "*"

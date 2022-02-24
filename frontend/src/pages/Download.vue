@@ -7,7 +7,7 @@
 
       <q-card-section style="background-color: rgba(0, 0, 0, 0.8)">
         <q-scroll-area class="text-white" style="height: 400px">
-          234
+          123
         </q-scroll-area>
       </q-card-section>
     </q-card>
@@ -15,16 +15,7 @@
 </template>
 
 <script>
-import { defineComponent } from "vue";
-import comptoolbar from "src/components/Toolbar.vue";
-
-export default defineComponent({
-  name: "PageShop",
-
-  setup() {},
-
-  components: {
-    comptoolbar,
-  },
-});
+export default {
+  name: "PageDownload",
+};
 </script>

@@ -36,6 +36,8 @@ import { defineComponent, ref } from "vue";
 import { useI18n } from "vue-i18n";
 
 export default defineComponent({
+  name: "compToolbar",
+
   setup() {
     const { locale } = useI18n({ useScope: "global" });
     locale.value = "zh-CN";

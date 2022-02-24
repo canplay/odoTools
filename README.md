@@ -1,7 +1,25 @@
-For odo private server and local server.
+# odo private server and local server tool suite
 
-To-do:
-Website(news, peral shop, center market, register, download, community)
-Client launcher(xc path, bsd update)
-Server manager(config, event, patch generate, etc)
-Gm tool(add item, level, exp, etc)
+- Website
+  - news
+  - pearl shop
+  - center market
+  - register
+  - download
+  - community
+
+- Client launcher
+  - xc path
+  - bsd update
+
+- Server manager
+  - config
+  - event
+  - patch generate
+  - etc
+
+- Gm tool
+  - add item
+  - adjust level
+  - adjust exp
+  - etc

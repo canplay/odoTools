@@ -11,4 +11,6 @@ export default {
   download: "下载",
   back: "返回",
   error404: "没有找到此页面",
+  announcement: "公告",
+  event: "活动",
 };

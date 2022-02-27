@@ -1,6 +1,7 @@
-# odo private server and local server tool suite
+# odo server toolbox ( WIP )
 
 - Website
+
   - news
   - pearl shop
   - center market
@@ -8,17 +9,20 @@
   - download
   - community
 
-- Client launcher
+- Client Launcher
+
   - xc path
   - bsd update
 
-- Server manager
+- Server Manager
+
   - config
   - event
   - patch generate
   - etc
 
-- Gm tool
+- Gm Tool
+
   - add item
   - adjust level
   - adjust exp

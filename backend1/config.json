@@ -1,0 +1,18 @@
+{
+  "url": "0.0.0.0:12347",
+  "pg_host": "",
+  "pg_name": "",
+  "pg_user": "",
+  "pg_pwd": "",
+  "mysql_host": "",
+  "mysql_name": "",
+  "mysql_user": "",
+  "mysql_pwd": "",
+  "mongodb_host": "",
+  "mongodb_name": "",
+  "mongodb_user": "",
+  "mongodb_pwd": "",
+  "refresh_rate": 60,
+  "register": false,
+  "thread_num": 2
+}

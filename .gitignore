@@ -1,5 +1,2 @@
-/bin
-/frontend/.vs
-/Temp
-/.vs
-/backend/build
+
+/backend/*.log

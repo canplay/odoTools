@@ -5,9 +5,11 @@ use anyhow::Error;
 use chrono::Local;
 use log::info;
 use log4rs;
+use mongodb::{options::ClientOptions, Client};
 use serde::{Deserialize, Serialize};
 use std::{fs::File, io::Read, path::Path};
 
+mod db;
 mod route;
 
 #[derive(Serialize, Deserialize, Clone)]
@@ -42,8 +44,13 @@ async fn main() -> Result<(), Error> {
     f.read_to_string(&mut s)?;
     let config: Conf = serde_json::from_str(&s)?;
 
+    let client_options = ClientOptions::parse(format!("mongodb://{}", config.mongodb_host)).await?;
+    let client = Client::with_options(client_options)?;
+    let db = client.database(format!("{}", config.mongodb_name).as_str());
+
     HttpServer::new(move || {
         App::new()
+            .data(db.clone())
             .wrap(Logger::default())
             .wrap(Logger::new("%a %{User-Agent}i"))
             .wrap(
@@ -66,7 +73,7 @@ async fn main() -> Result<(), Error> {
                     .secure(false)
                     .http_only(false),
             )
-            .service(route::general::login)
+            .service(route::user::register)
     })
     .workers(config.thread_num)
     .bind(&config.url)?

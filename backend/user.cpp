@@ -16,7 +16,7 @@ api::v1::User::User()
 {
 }
 
-void api::v1::User::register(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& callback) const
+void api::v1::User::reg(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& callback) const
 {
 	time_t t = system_clock::to_time_t(system_clock::now());
 	auto tm_Prev = fmt::localtime(g_token.time);
@@ -25,7 +25,6 @@ void api::v1::User::register(const HttpRequestPtr& req, std::function<void(const
 
 	LOG_INFO << tm_Now.tm_min - tm_Prev.tm_min;
 	if (tm_Now.tm_min - tm_Prev.tm_min >= 40 || g_token.time == 0) {
-		get_token();
 	}
 
 	Json::Reader reader;

@@ -4,7 +4,7 @@
 >    - news
 >    - pearl shop
 >    - center market
->    - register (done)
+>    - register √
 >    - login
 >    - download
 >    - community

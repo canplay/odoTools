@@ -1,29 +1,30 @@
 # odo server toolbox ( WIP )
 
-- Website
+> - ## Website
+>    - news
+>    - pearl shop
+>    - center market
+>    - register (done)
+>    - login
+>    - download
+>    - community
 
-  - news
-  - pearl shop
-  - center market
-  - register
-  - download
-  - community
+> - ## Client Launcher
+>    - xc path (ignore)
+>    - bsd update
 
-- Client Launcher
+> - ## Server Manager
+>    - config
+>    - event
+>    - client patch generate
+>    - etc
 
-  - xc path
-  - bsd update
-
-- Server Manager
-
-  - config
-  - event
-  - patch generate
-  - etc
-
-- Gm Tool
-
-  - add item
-  - adjust level
-  - adjust exp
-  - etc
+> - ## Gm Tool
+>    - broadcast
+>    - quest
+>    - items
+>    - equip
+>    - outfit
+>    - level
+>    - exp
+>    - etc

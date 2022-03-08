@@ -1,6 +1,6 @@
 use actix_cors::Cors;
 use actix_session::CookieSession;
-use actix_web::{http, middleware, middleware::Logger, App, HttpServer};
+use actix_web::{middleware, middleware::Logger, web::Data, App, HttpServer};
 use anyhow::Error;
 use chrono::Local;
 use log::info;
@@ -44,13 +44,22 @@ async fn main() -> Result<(), Error> {
     f.read_to_string(&mut s)?;
     let config: Conf = serde_json::from_str(&s)?;
 
-    let client_options = ClientOptions::parse(format!("mongodb://{}", config.mongodb_host)).await?;
+    let client_options;
+    if config.mongodb_user != "" && config.mongodb_pwd != "" {
+        client_options = ClientOptions::parse(format!(
+            "mongodb://{}:{}@{}",
+            config.mongodb_user, config.mongodb_pwd, config.mongodb_host
+        ))
+        .await?;
+    } else {
+        client_options = ClientOptions::parse(format!("mongodb://{}", config.mongodb_host)).await?;
+    }
     let client = Client::with_options(client_options)?;
     let db = client.database(format!("{}", config.mongodb_name).as_str());
 
     HttpServer::new(move || {
         App::new()
-            .data(db.clone())
+            .app_data(Data::new(db.clone()))
             .wrap(Logger::default())
             .wrap(Logger::new("%a %{User-Agent}i"))
             .wrap(
@@ -61,12 +70,12 @@ async fn main() -> Result<(), Error> {
                     .supports_credentials()
                     .max_age(3600),
             )
-            .wrap(middleware::DefaultHeaders::new().header("Server", "CaNplay"))
+            .wrap(middleware::DefaultHeaders::new().add(("Server", "CaNplay")))
             .wrap(
                 middleware::DefaultHeaders::new()
-                    .header("date", Local::now().format("%Y-%m-%d %H:%M:%S").to_string()),
+                    .add(("date", Local::now().format("%Y-%m-%d %H:%M:%S").to_string())),
             )
-            .wrap(middleware::Compress::new(http::ContentEncoding::Gzip))
+            .wrap(middleware::Compress::default())
             .wrap(
                 CookieSession::signed(&[0; 32])
                     .name("canplay")
@@ -74,6 +83,7 @@ async fn main() -> Result<(), Error> {
                     .http_only(false),
             )
             .service(route::user::register)
+            .service(route::user::login)
     })
     .workers(config.thread_num)
     .bind(&config.url)?

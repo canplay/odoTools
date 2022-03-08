@@ -14,12 +14,9 @@ actix-cors = "*"
 actix-session = "*"
 serde = "*"
 serde_json = "*"
-once_cell = "*"
 chrono = { version = "*", features = ["serde"] }
-uuid = { version = "*", features = ["v4"] }
-blake2 = "*"
-urlencoding = "*"
+rand = "*"
 reqwest = { version = "*", features = ["cookies", "gzip", "json"] }
 anyhow = "*"
-sha256 = "*"
 mongodb = "*"
+bcrypt = "*"

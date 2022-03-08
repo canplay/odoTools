@@ -13,4 +13,8 @@ export default {
   error404: "没有找到此页面",
   announcement: "公告",
   event: "活动",
+  username: "用户名",
+  password: "密码",
+  login: "登录",
+  register: "注册",
 };

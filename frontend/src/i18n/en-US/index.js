@@ -11,4 +11,10 @@ export default {
   download: "Download",
   back: "Go Home",
   error404: "Nothing here",
+  announcement: "Announcement",
+  event: "Event",
+  username: "Username",
+  password: "Password",
+  login: "Login",
+  register: "Register",
 };

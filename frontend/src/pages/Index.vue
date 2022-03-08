@@ -1,20 +1,27 @@
 <template>
   <q-page padding>
     <q-card class="transparent no-box-shadow">
-      <comptoolbar />
+      <comtoolbar />
 
       <div style="height: 8px" />
 
       <q-card-section style="background-color: rgba(0, 0, 0, 0.8)">
-        <q-scroll-area class="text-white" style="min-height: 400px" ref="area">
+        <q-scroll-area class="text-white" style="min-height: 500px" ref="area">
           <div class="row">
-            <q-card class="col" style="background-color: rgba(0, 0, 0, 0.5)">
+            <q-card class="col transparent">
               <q-list>
-                <q-item-label class="text-bold text-h6">
+                <q-item-label class="text-bold text-h5 text-center">
                   {{ $t("announcement") }}
                 </q-item-label>
 
                 <q-item-section>
+                  <q-item clickable> 123 </q-item>
+                  <q-item clickable> 123 </q-item>
+                  <q-item clickable> 123 </q-item>
+                  <q-item clickable> 123 </q-item>
+                  <q-item clickable> 123 </q-item>
+                  <q-item clickable> 123 </q-item>
+                  <q-item clickable> 123 </q-item>
                   <q-item clickable> 123 </q-item>
                 </q-item-section>
               </q-list>
@@ -22,13 +29,20 @@
 
             <div class="col-auto" style="width: 8px" />
 
-            <q-card class="col" style="background-color: rgba(0, 0, 0, 0.5)">
+            <q-card class="col transparent">
               <q-list>
-                <q-item-label class="text-bold text-h6">
+                <q-item-label class="text-bold text-h5 text-center">
                   {{ $t("event") }}
                 </q-item-label>
 
                 <q-item-section>
+                  <q-item clickable> 123 </q-item>
+                  <q-item clickable> 123 </q-item>
+                  <q-item clickable> 123 </q-item>
+                  <q-item clickable> 123 </q-item>
+                  <q-item clickable> 123 </q-item>
+                  <q-item clickable> 123 </q-item>
+                  <q-item clickable> 123 </q-item>
                   <q-item clickable> 123 </q-item>
                 </q-item-section>
               </q-list>
@@ -49,37 +63,26 @@
                 transition-next="slide-left"
                 @mouseenter="autoplay = false"
                 @mouseleave="autoplay = true"
+                style="min-height: 320px"
               >
-                <q-carousel-slide
-                  :name="1"
-                  img-src="https://cdn.quasar.dev/img/mountains.jpg"
-                />
-                <q-carousel-slide
-                  :name="2"
-                  img-src="https://cdn.quasar.dev/img/parallax1.jpg"
-                />
-                <q-carousel-slide
-                  :name="3"
-                  img-src="https://cdn.quasar.dev/img/parallax2.jpg"
-                />
-                <q-carousel-slide
-                  :name="4"
-                  img-src="https://cdn.quasar.dev/img/quasar.jpg"
-                />
+                <q-carousel-slide :name="1" img-src="imgs/no-imgs.png" />
+                <q-carousel-slide :name="2" img-src="imgs/no-imgs.png" />
+                <q-carousel-slide :name="3" img-src="imgs/no-imgs.png" />
+                <q-carousel-slide :name="4" img-src="imgs/no-imgs.png" />
               </q-carousel>
 
               <div class="col-auto" style="height: 8px" />
 
               <q-form class="col">
-                <q-input dark label="用户名" />
-                <q-input dark label="密码" />
+                <q-input dark :label="$t('username')" />
+                <q-input dark :label="$t('password')" />
 
                 <div style="height: 8px" />
 
                 <div class="row">
-                  <q-btn class="col" color="green" label="登录" />
+                  <q-btn class="col" color="green" :label="$t('login')" />
                   <div class="col-auto" style="width: 8px" />
-                  <q-btn class="col" color="red" label="注册" />
+                  <q-btn class="col" color="red" :label="$t('register')" />
                 </div>
               </q-form>
             </div>
@@ -92,20 +95,20 @@
 
 <script>
 import { defineComponent, ref } from "vue";
-import comptoolbar from "src/components/Toolbar.vue";
+import comtoolbar from "components/Toolbar.vue";
 
 export default defineComponent({
   name: "PageIndex",
+
+  components: {
+    comtoolbar,
+  },
 
   setup() {
     return {
       slide: ref(1),
       autoplay: ref(true),
     };
-  },
-
-  components: {
-    comptoolbar,
   },
 
   mounted() {

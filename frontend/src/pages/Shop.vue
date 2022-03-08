@@ -1,13 +1,13 @@
 <template>
   <q-page padding>
     <q-card class="transparent no-box-shadow">
-      <comptoolbar />
+      <comtoolbar />
 
       <div style="height: 8px" />
 
       <q-card-section style="background-color: rgba(0, 0, 0, 0.8)">
         <q-scroll-area class="text-white" style="height: 400px">
-          234
+          {{ $t("shop") }}
         </q-scroll-area>
       </q-card-section>
     </q-card>
@@ -16,15 +16,13 @@
 
 <script>
 import { defineComponent } from "vue";
-import comptoolbar from "src/components/Toolbar.vue";
+import comtoolbar from "components/Toolbar.vue";
 
 export default defineComponent({
   name: "PageShop",
 
-  setup() {},
-
   components: {
-    comptoolbar,
+    comtoolbar,
   },
 });
 </script>

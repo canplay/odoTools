@@ -1,4 +1,4 @@
-# odo server toolbox ( WIP )
+# Odo Server Toolbox ( WIP )
 
 > - ## Website
 >    - news
@@ -10,8 +10,11 @@
 >    - community
 
 > - ## Client Launcher
->    - xc path (ignore)
+>    - xc path
 >    - bsd update
+>    - support version 2100
+>    - support version 2260
+>    - support version 2508
 
 > - ## Server Manager
 >    - config
@@ -31,30 +34,34 @@
 
 # Build
 > - ## frontend
->    - requirement:
->        - 1.nodejs (https://nodejs.org/)
->        - 2.yarn (https://classic.yarnpkg.com/lang/en/)
->        - 3.quasar (https://quasar.dev/)
->    - debug commond:
+>    - Requirement:
+>        - Nodejs (https://nodejs.org/)
+>        - Yarn (https://classic.yarnpkg.com/lang/en/)
+>        - Quasar (https://quasar.dev/)
+>    - Debug commond:
 >        - quasar dev
->    - release commond:
+>    - Release commond:
 >        - quasar build
->    - output dir
->        - <frontend dir>/dist/spa
+>    - Output dir
+>        - \<frontend dir\>/dist/spa
 > - ## launcher & backend
->    - requirement:
->        - 1.rust (https://www.rust-lang.org/)
->    - debug commond:
+>    - Requirement:
+>        - Rust (https://www.rust-lang.org/)
+>    - Debug commond:
 >        - cargo run
->    - release commond:
+>    - Release commond:
 >        - cargo build --release
->    - output dir
->        - <your launcher dir or your backend dir>/target/release
-  
+>    - Output dir
+>        - \<your launcher dir or your backend dir\>/target/release
+
 # Useage
 > - ## frontend
->    - put in <your odo server dir>/web
+>    - Put the files in the \<your frontend dir\>/dist/spa directory into the \<your odo server dir\>/web
 > - ## backend
->    - put in <your odo server dir>
+>    - Place backend.exe & config.json & log4rs.yaml in the \<your odo server dir\>
 > - ## launcher
->    - put in <your odo client dir>
+>    - Place launcher.exe in the \<your odo client dir\>
+> - Firewall permits port 12347, modify the database port in \<your odo server dir\>/config.json
+> - Start backend.exe and wait for the display ' ===== all success ===== '
+> - Open website http://localhost:12347 to register an account
+> - Login to the game using launcher.exe

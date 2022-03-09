@@ -2,19 +2,30 @@
 // so you can safely delete all default props below
 
 export default {
-  language: "Global",
   title: "Black Desert",
-  news: "News",
-  shop: "Shop",
-  market: "Market",
-  community: "Community",
-  download: "Download",
   back: "Go Home",
-  error404: "Nothing here",
-  announcement: "Announcement",
-  event: "Event",
-  username: "Username",
-  password: "Password",
-  login: "Login",
-  register: "Register",
+  toobar: {
+    news: "News",
+    shop: "Shop",
+    market: "Market",
+    community: "Community",
+    download: "Download",
+    language: "English",
+  },
+  error: {
+    404: "Nothing here",
+    noUsername: "Username is empty",
+    noPassword: "Password is empty",
+  },
+  index: {
+    announcement: "Announcement",
+    event: "Event",
+    username: "Username",
+    password: "Password",
+    login: "Login",
+    register: "Register",
+  },
+  shop: {
+    hot: "Hot",
+  },
 };

@@ -5,7 +5,7 @@
     <div>
       <div style="font-size: 30vh">404</div>
 
-      <div class="text-h2" style="opacity: 0.4">{{ $t("error404") }}</div>
+      <div class="text-h2" style="opacity: 0.4">{{ $t("404") }}</div>
 
       <q-btn
         class="q-mt-xl"

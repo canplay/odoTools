@@ -7,7 +7,7 @@
 
       <q-card-section style="background-color: rgba(0, 0, 0, 0.8)">
         <q-scroll-area class="text-white" style="height: 400px">
-          {{ $t("market") }}
+          {{ $t("toolbar.market") }}
         </q-scroll-area>
       </q-card-section>
     </q-card>

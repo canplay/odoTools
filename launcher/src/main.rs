@@ -13,13 +13,54 @@ use windows::{
 };
 */
 
+use anyhow::Error;
+use chrono::Local;
+use ini::Ini;
+use std::{env, ffi::c_void, io};
+use tracing::{info, instrument};
+use tracing_appender::rolling;
+use tracing_subscriber::{
+    fmt::{self, format::Writer, time::FormatTime},
+    layer::SubscriberExt,
+    EnvFilter,
+};
 use windows::{
     core::PCSTR,
     Win32::{
-        Foundation::HWND,
+        Foundation,
+        System::Registry,
         UI::{Shell::*, WindowsAndMessaging::*},
     },
 };
+
+#[derive(Clone, Debug)]
+struct ConfigService {
+    types: String,
+    res: String,
+}
+
+#[derive(Clone, Debug)]
+struct ConfigGt {
+    authentic_domain: String,
+    authentic_port: String,
+    patch_url: String,
+    view_trade_market_url: String,
+    game_trade_market_url: String,
+}
+
+#[derive(Clone, Debug)]
+struct ConfigVersion {
+    launcher: String,
+    client: String,
+    resource: String,
+}
+
+struct LocalTimer;
+impl FormatTime for LocalTimer {
+    fn format_time(&self, w: &mut Writer<'_>) -> std::fmt::Result {
+        write!(w, "{}", Local::now().format("%Y-%m-%d %H:%M:%S"))
+    }
+}
 
 /*
 fn read_patch(h_handle: HANDLE, address: *mut u8, buffer: *mut c_void) -> bool {
@@ -51,8 +92,9 @@ fn write_patch(h_handle: HANDLE, address: *mut u8, buffer: *mut c_void) -> bool 
 }
  */
 
-fn run_game(path: &str, username: &str, password: &str) -> Result<bool, String> {
-    let result = false;
+#[instrument]
+fn run_game(path: &str, username: &str, password: &str) -> Result<bool, Error> {
+    let result = true;
 
     let s = path.to_string();
     let len_end = s.rfind("/").unwrap();
@@ -60,7 +102,7 @@ fn run_game(path: &str, username: &str, password: &str) -> Result<bool, String> 
 
     unsafe {
         ShellExecuteA(
-            HWND::default(),
+            Foundation::HWND::default(),
             PCSTR("open\0".as_ptr()),
             PCSTR(format!("{}\0", path).as_ptr()),
             PCSTR(format!("{},{}\0", username, password).as_ptr()),
@@ -225,6 +267,190 @@ fn run_game(path: &str, username: &str, password: &str) -> Result<bool, String> 
     Ok(result)
 }
 
-fn main() {
-    run_game("E:/Black Desert/Client/bin64/BlackDesert64.exe", "1", "1").unwrap();
+fn register_protocol() -> Result<bool, Error> {
+    let h_key: *mut Registry::HKEY = std::ptr::null_mut();
+    let data: *mut c_void = std::ptr::null_mut();
+
+    if unsafe {
+        Registry::RegCreateKeyA(
+            Registry::HKEY_CLASSES_ROOT,
+            PCSTR("ODOLauncher\0".as_ptr()),
+            h_key,
+        )
+    } == Foundation::ERROR_SUCCESS
+    {
+        if unsafe {
+            Registry::RegSetKeyValueA(
+                h_key.as_ref().unwrap(),
+                PCSTR("\0".as_ptr()),
+                PCSTR("URL Protocol\0".as_ptr()),
+                Registry::REG_SZ.0,
+                data,
+                "URL Protocol\0".len() as u32,
+            )
+        } == Foundation::ERROR_SUCCESS
+        {
+            if unsafe {
+                Registry::RegSetValueA(
+                    h_key.as_ref().unwrap(),
+                    PCSTR("\0".as_ptr()),
+                    Registry::REG_SZ,
+                    PCSTR("URL:ODO Launcher Protocol\0".as_ptr()),
+                    "URL:ODO Launcher Protocol\0".len() as u32,
+                )
+            } == Foundation::ERROR_SUCCESS
+            {
+                unsafe { Registry::RegCloseKey(h_key.as_ref().unwrap()) };
+
+                if unsafe {
+                    Registry::RegCreateKeyA(
+                        Registry::HKEY_CLASSES_ROOT,
+                        PCSTR("ODOLauncher\\DefaultIcon\0".as_ptr()),
+                        h_key,
+                    )
+                } == Foundation::ERROR_SUCCESS
+                {
+                    if unsafe {
+                        Registry::RegSetValueA(
+                            h_key.as_ref().unwrap(),
+                            PCSTR("\0".as_ptr()),
+                            Registry::REG_SZ,
+                            PCSTR("\"ODOLauncher\\DefaultIcon\",0\0".as_ptr()),
+                            Foundation::MAX_PATH,
+                        )
+                    } == Foundation::ERROR_SUCCESS
+                    {
+                        unsafe { Registry::RegCloseKey(h_key.as_ref().unwrap()) };
+
+                        if unsafe {
+                            Registry::RegCreateKeyA(
+                                Registry::HKEY_CLASSES_ROOT,
+                                PCSTR("ODOLauncher\\shell\\open\\command\0".as_ptr()),
+                                h_key,
+                            )
+                        } == Foundation::ERROR_SUCCESS
+                        {
+                            if unsafe {
+                                Registry::RegSetValueA(
+                                    h_key.as_ref().unwrap(),
+                                    PCSTR("\0".as_ptr()),
+                                    Registry::REG_SZ,
+                                    PCSTR(format!("{}").as_ptr()),
+                                    Foundation::MAX_PATH,
+                                )
+                            } == Foundation::ERROR_SUCCESS
+                            {}
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    unsafe { Registry::RegCloseKey(h_key.as_ref().unwrap()) };
+
+    Ok(true)
+}
+
+#[instrument]
+fn main() -> Result<(), Error> {
+    let file_appender = rolling::daily(".", "tracing.log");
+    let (non_blocking, _guard) = tracing_appender::non_blocking(file_appender);
+    let subscriber = tracing_subscriber::registry()
+        .with(EnvFilter::from_default_env().add_directive(tracing::Level::TRACE.into()))
+        .with(
+            fmt::Layer::new().with_writer(io::stdout).event_format(
+                tracing_subscriber::fmt::format()
+                    .with_level(true)
+                    .with_target(true)
+                    .with_timer(LocalTimer),
+            ),
+        )
+        .with(
+            fmt::Layer::new()
+                .with_writer(non_blocking)
+                .event_format(
+                    tracing_subscriber::fmt::format()
+                        .with_level(true)
+                        .with_target(true)
+                        .with_timer(LocalTimer),
+                )
+                .with_ansi(false),
+        );
+    tracing::subscriber::set_global_default(subscriber).expect("Unable to set a global collector");
+
+    info!("========== 程序启动 ==========");
+
+    let config = Ini::load_from_file("service.ini");
+
+    if config.is_ok() {
+        let c = config.unwrap();
+        let section_service = c.section(Some("SERVICE")).unwrap();
+        let section_gt = c.section(Some("GT")).unwrap();
+        let section_version = c.section(Some("VERSION")).unwrap();
+
+        let config_service = ConfigService {
+            types: section_service.get("TYPE").unwrap().to_string(),
+            res: section_service.get("RES").unwrap().to_string(),
+        };
+        let config_gt = ConfigGt {
+            authentic_domain: section_gt.get("AUTHENTIC_DOMAIN").unwrap().to_string(),
+            authentic_port: section_gt.get("AUTHENTIC_PORT").unwrap().to_string(),
+            patch_url: section_gt.get("PATCH_URL").unwrap().to_string(),
+            view_trade_market_url: section_gt.get("viewTradeMarketUrl").unwrap().to_string(),
+            game_trade_market_url: section_gt.get("gameTradeMarketUrl").unwrap().to_string(),
+        };
+
+        let config_version = ConfigVersion {
+            launcher: section_version.get("launcher").unwrap().to_string(),
+            client: section_version.get("client").unwrap().to_string(),
+            resource: section_version.get("resource").unwrap().to_string(),
+        };
+    } else {
+        let mut c = config.unwrap();
+        c.with_section(Some("SERVICE"))
+            .set("TYPE", "GT")
+            .set("RES", "_EN_");
+
+        c.with_section(Some("GT"))
+            .set("AUTHENTIC_DOMAIN", "127.0.0.1")
+            .set("AUTHENTIC_PORT", "9888")
+            .set(
+                "PATCH_URL",
+                "http://dn.global-lab.playblackdesert.com/UploadData/",
+            )
+            .set(
+                "viewTradeMarketUrl",
+                "https://trade.global-lab.playblackdesert.com/",
+            )
+            .set(
+                "gameTradeMarketUrl",
+                "https://game-trade.global-lab.playblackdesert.com/",
+            );
+        c.write_to_file("service.ini").unwrap();
+    }
+
+    let args: Vec<String> = env::args().collect();
+
+    let r = run_game(
+        &format!(
+            "{}/bin64/BlackDesert64.exe",
+            env::current_dir().unwrap().display()
+        ),
+        &args[1],
+        &args[2],
+    )
+    .unwrap();
+
+    info!(
+        "========== {}",
+        if r {
+            "启动游戏客户端成功!"
+        } else {
+            "启动游戏客户端失败!"
+        }
+    );
+
+    info!("========== 程序退出 ==========");
+    Ok(())
 }

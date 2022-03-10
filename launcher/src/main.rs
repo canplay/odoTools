@@ -92,16 +92,15 @@ fn write_patch(h_handle: HANDLE, address: *mut u8, buffer: *mut c_void) -> bool 
 }
  */
 
-#[instrument]
 fn run_game(path: &str, username: &str, password: &str) -> Result<bool, Error> {
-    let result = true;
-
+    let mut result = false;
     let s = path.to_string();
     let len_end = s.rfind("/").unwrap();
     let dir = s.get(0..len_end + 1).unwrap();
+    let h: Foundation::HINSTANCE;
 
     unsafe {
-        ShellExecuteA(
+        h = ShellExecuteA(
             Foundation::HWND::default(),
             PCSTR("open\0".as_ptr()),
             PCSTR(format!("{}\0", path).as_ptr()),
@@ -264,97 +263,103 @@ fn run_game(path: &str, username: &str, password: &str) -> Result<bool, Error> {
        }
     */
 
+    if h.is_invalid() {
+        result = true;
+    }
+
     Ok(result)
 }
 
 fn register_protocol() -> Result<bool, Error> {
-    let h_key: *mut Registry::HKEY = std::ptr::null_mut();
-    let data: *mut c_void = std::ptr::null_mut();
+    let mut result = false;
+    let mut h_key: Registry::HKEY = Registry::HKEY::default();
+    let path = std::env::current_exe().unwrap().display().to_string();
 
     if unsafe {
         Registry::RegCreateKeyA(
             Registry::HKEY_CLASSES_ROOT,
             PCSTR("ODOLauncher\0".as_ptr()),
-            h_key,
+            &mut h_key,
         )
     } == Foundation::ERROR_SUCCESS
     {
         if unsafe {
             Registry::RegSetKeyValueA(
-                h_key.as_ref().unwrap(),
+                h_key,
                 PCSTR("\0".as_ptr()),
                 PCSTR("URL Protocol\0".as_ptr()),
                 Registry::REG_SZ.0,
-                data,
-                "URL Protocol\0".len() as u32,
+                "\0".as_ptr() as *mut c_void,
+                2,
             )
         } == Foundation::ERROR_SUCCESS
         {
             if unsafe {
                 Registry::RegSetValueA(
-                    h_key.as_ref().unwrap(),
+                    h_key,
                     PCSTR("\0".as_ptr()),
                     Registry::REG_SZ,
                     PCSTR("URL:ODO Launcher Protocol\0".as_ptr()),
-                    "URL:ODO Launcher Protocol\0".len() as u32,
+                    0,
                 )
             } == Foundation::ERROR_SUCCESS
             {
-                unsafe { Registry::RegCloseKey(h_key.as_ref().unwrap()) };
+                unsafe { Registry::RegCloseKey(h_key) };
 
                 if unsafe {
                     Registry::RegCreateKeyA(
                         Registry::HKEY_CLASSES_ROOT,
                         PCSTR("ODOLauncher\\DefaultIcon\0".as_ptr()),
-                        h_key,
+                        &mut h_key,
                     )
                 } == Foundation::ERROR_SUCCESS
                 {
                     if unsafe {
                         Registry::RegSetValueA(
-                            h_key.as_ref().unwrap(),
+                            h_key,
                             PCSTR("\0".as_ptr()),
                             Registry::REG_SZ,
-                            PCSTR("\"ODOLauncher\\DefaultIcon\",0\0".as_ptr()),
-                            Foundation::MAX_PATH,
+                            PCSTR(format!("\"{}\", 0\0", path).as_ptr()),
+                            0,
                         )
                     } == Foundation::ERROR_SUCCESS
                     {
-                        unsafe { Registry::RegCloseKey(h_key.as_ref().unwrap()) };
+                        unsafe { Registry::RegCloseKey(h_key) };
 
                         if unsafe {
                             Registry::RegCreateKeyA(
                                 Registry::HKEY_CLASSES_ROOT,
                                 PCSTR("ODOLauncher\\shell\\open\\command\0".as_ptr()),
-                                h_key,
+                                &mut h_key,
                             )
                         } == Foundation::ERROR_SUCCESS
                         {
                             if unsafe {
                                 Registry::RegSetValueA(
-                                    h_key.as_ref().unwrap(),
+                                    h_key,
                                     PCSTR("\0".as_ptr()),
                                     Registry::REG_SZ,
-                                    PCSTR(format!("{}").as_ptr()),
-                                    Foundation::MAX_PATH,
+                                    PCSTR(format!("\"{}\" \"%1\"\0", path).as_ptr()),
+                                    0,
                                 )
                             } == Foundation::ERROR_SUCCESS
-                            {}
+                            {
+                                result = true;
+                            }
                         }
                     }
                 }
             }
         }
+        unsafe { Registry::RegCloseKey(h_key) };
     }
 
-    unsafe { Registry::RegCloseKey(h_key.as_ref().unwrap()) };
-
-    Ok(true)
+    Ok(result)
 }
 
 #[instrument]
 fn main() -> Result<(), Error> {
-    let file_appender = rolling::daily(".", "tracing.log");
+    let file_appender = rolling::daily("E:/Black Desert/Client", "log");
     let (non_blocking, _guard) = tracing_appender::non_blocking(file_appender);
     let subscriber = tracing_subscriber::registry()
         .with(EnvFilter::from_default_env().add_directive(tracing::Level::TRACE.into()))
@@ -379,7 +384,13 @@ fn main() -> Result<(), Error> {
         );
     tracing::subscriber::set_global_default(subscriber).expect("Unable to set a global collector");
 
-    info!("========== 程序启动 ==========");
+    info!("========== Start ==========");
+
+    info!(
+        "{:?} {:?}",
+        std::env::current_dir().unwrap().display(),
+        std::env::current_exe().unwrap().as_path()
+    );
 
     let config = Ini::load_from_file("service.ini");
 
@@ -432,25 +443,68 @@ fn main() -> Result<(), Error> {
 
     let args: Vec<String> = env::args().collect();
 
-    let r = run_game(
-        &format!(
-            "{}/bin64/BlackDesert64.exe",
-            env::current_dir().unwrap().display()
-        ),
-        &args[1],
-        &args[2],
-    )
-    .unwrap();
+    match args[1].as_str() {
+        // register
+        "register" => {
+            let r = register_protocol().unwrap();
 
-    info!(
-        "========== {}",
-        if r {
-            "启动游戏客户端成功!"
-        } else {
-            "启动游戏客户端失败!"
+            info!(
+                "========== {}",
+                if r {
+                    "register url protocol success!"
+                } else {
+                    "register url protocol fail!"
+                }
+            );
         }
-    );
+        // run 1 1
+        "run" => {
+            let r = run_game(
+                &format!(
+                    "{}/bin64/BlackDesert64.exe",
+                    env::current_dir().unwrap().display()
+                ),
+                &args[1],
+                &args[2],
+            )
+            .unwrap();
 
-    info!("========== 程序退出 ==========");
+            info!(
+                "========== {}",
+                if r {
+                    "launch game client success!"
+                } else {
+                    "launch game client fail!"
+                }
+            );
+        }
+        _ => {
+            // odolauncher://1&1/
+            if args[1].starts_with("odolauncher://") {
+                let v: Vec<&str> = args[1].split(&['/', '&'][..]).collect();
+
+                let r = run_game(
+                    &format!(
+                        "{}/bin64/BlackDesert64.exe",
+                        env::current_dir().unwrap().display()
+                    ),
+                    v[2],
+                    v[3],
+                )
+                .unwrap();
+
+                info!(
+                    "========== {}",
+                    if r {
+                        "launch game client success!"
+                    } else {
+                        "launch game client fail!"
+                    }
+                );
+            }
+        }
+    }
+
+    info!("========== End ==========");
     Ok(())
 }

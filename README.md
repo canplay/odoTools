@@ -82,4 +82,7 @@
 
 # NOTE
 
-> - Firewall permits port 12347, modify the database port in \<your odo server dir\>/config.json, modify the gameserver port in \<your odo server dir\>/web/config.json
+> - Firewall permits port 12347
+> - modify the database port in \<your odo server dir\>/config.json
+> - modify the game server address in \<your odo server dir\>/web/config.json
+> - modify the game server ip in \<your odo client dir\>/service.ini

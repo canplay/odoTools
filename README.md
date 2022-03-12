@@ -65,8 +65,8 @@
 >   - Place launcher.exe & service.ini in the \<your odo client dir\>
 > - Firewall permits port 12347, modify the database port in \<your odo server dir\>/config.json
 
-> # Release of Useage
->
+# Release of Useage
+
 > - ## server
 >   - Put the files in the \<release dir\>/server directory into the \<your odo server dir\>
 >   - Startup sequence
@@ -80,6 +80,6 @@
 >   - Register or login on the website
 >   - Start Game
 
-> # NOTE
->
+# NOTE
+
 > - Firewall permits port 12347, modify the database port in \<your odo server dir\>/config.json, modify the gameserver port in \<your odo server dir\>/web/config.json

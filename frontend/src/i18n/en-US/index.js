@@ -4,7 +4,8 @@
 export default {
   title: "Black Desert",
   back: "Go Home",
-  toobar: {
+  search: "search",
+  toolbar: {
     news: "News",
     shop: "Shop",
     market: "Market",
@@ -16,6 +17,8 @@ export default {
     404: "Nothing here",
     noUsername: "Username is empty",
     noPassword: "Password is empty",
+    network: "Network error, please try again later",
+    launcher: "Failed to start the game",
   },
   index: {
     announcement: "Announcement",
@@ -24,8 +27,19 @@ export default {
     password: "Password",
     login: "Login",
     register: "Register",
+    run: "Run game",
+    loginout: "Loginout",
   },
   shop: {
     hot: "Hot",
+    vip: "Vip",
+    items: "Items",
+    outfit: "Outfit",
+    equip: "Equip",
+  },
+  user: {
+    family: "Family",
+    access_level: "Vip Level",
+    cash: "Cash",
   },
 };

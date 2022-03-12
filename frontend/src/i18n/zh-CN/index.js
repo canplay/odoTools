@@ -17,6 +17,8 @@ export default {
     404: "没有找到此页面",
     noUsername: "用户名不能为空",
     noPassword: "密码不能为空",
+    network: "网络错误，请稍后重试",
+    launcher: "启动游戏失败",
   },
   index: {
     announcement: "公告",
@@ -25,6 +27,8 @@ export default {
     password: "密码",
     login: "登录",
     register: "注册",
+    run: "启动游戏",
+    loginout: "退出",
   },
   shop: {
     hot: "热卖",
@@ -32,5 +36,10 @@ export default {
     items: "道具",
     outfit: "时装",
     equip: "装备",
+  },
+  user: {
+    family: "家族名",
+    access_level: "会员等级",
+    cash: "点券",
   },
 };

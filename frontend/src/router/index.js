@@ -16,7 +16,7 @@ import routes from "./routes";
  * with the Router instance.
  */
 
-export default route(function (/* { store, ssrContext } */) {
+export default route(function ({ store /* , ssrContext */ }) {
   const createHistory = process.env.SERVER
     ? createMemoryHistory
     : process.env.VUE_ROUTER_MODE === "history"
@@ -35,5 +35,17 @@ export default route(function (/* { store, ssrContext } */) {
     ),
   });
 
+  Router.beforeEach((to, from, next) => {
+    if (
+      to.path != "/" &&
+      to.path != "/shop" &&
+      to.path != "/market" &&
+      to.path != "/community" &&
+      to.path != "/download" &&
+      !store.state.global.loginin
+    ) {
+      next("/");
+    } else next();
+  });
   return Router;
 });

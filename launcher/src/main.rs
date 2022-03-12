@@ -1,23 +1,8 @@
-/*
-use std::{ffi::c_void, mem, thread, time::Duration};
-use windows::{
-    core::PCSTR,
-    Win32::{
-        Foundation::{self, HANDLE, HWND},
-        System::{
-            Diagnostics::{Debug, ToolHelp},
-            Threading,
-        },
-        UI::{Shell::*, WindowsAndMessaging::*},
-    },
-};
-*/
-
 use anyhow::Error;
 use chrono::Local;
 use ini::Ini;
-use std::{env, ffi::c_void, io};
-use tracing::{info, instrument};
+use std::{env, ffi::c_void, io, mem, thread, time::Duration};
+use tracing::{info, instrument, Level};
 use tracing_appender::rolling;
 use tracing_subscriber::{
     fmt::{self, format::Writer, time::FormatTime},
@@ -28,7 +13,10 @@ use windows::{
     core::PCSTR,
     Win32::{
         Foundation,
-        System::Registry,
+        System::{
+            Diagnostics::{Debug, ToolHelp},
+            Registry, Threading,
+        },
         UI::{Shell::*, WindowsAndMessaging::*},
     },
 };
@@ -62,8 +50,7 @@ impl FormatTime for LocalTimer {
     }
 }
 
-/*
-fn read_patch(h_handle: HANDLE, address: *mut u8, buffer: *mut c_void) -> bool {
+fn read_patch(h_handle: Foundation::HANDLE, address: *mut u8, buffer: *mut c_void) -> bool {
     let mut size = 0;
     let address_ptr = address as *mut _ as *mut c_void;
 
@@ -77,7 +64,7 @@ fn read_patch(h_handle: HANDLE, address: *mut u8, buffer: *mut c_void) -> bool {
     return true;
 }
 
-fn write_patch(h_handle: HANDLE, address: *mut u8, buffer: *mut c_void) -> bool {
+fn write_patch(h_handle: Foundation::HANDLE, address: *mut u8, buffer: *mut c_void) -> bool {
     let mut size = 0;
     let address_ptr = address as *mut _ as *mut c_void;
 
@@ -90,9 +77,8 @@ fn write_patch(h_handle: HANDLE, address: *mut u8, buffer: *mut c_void) -> bool 
 
     return true;
 }
- */
 
-fn run_game(path: &str, username: &str, password: &str) -> Result<bool, Error> {
+fn run_game(path: &str, username: &str, password: &str) -> Result<bool, String> {
     let mut result = false;
     let s = path.to_string();
     let len_end = s.rfind("/").unwrap();
@@ -110,160 +96,164 @@ fn run_game(path: &str, username: &str, password: &str) -> Result<bool, Error> {
         );
     }
 
-    /*
-       thread::sleep(Duration::from_secs(5));
+    if !h.is_invalid() {
+        result = true;
+    }
 
-       let mut h_snapshot =
-           unsafe { ToolHelp::CreateToolhelp32Snapshot(ToolHelp::TH32CS_SNAPPROCESS, 0) };
+    return Ok(result);
 
-       if h_snapshot != Foundation::INVALID_HANDLE_VALUE {
-           let mut process: ToolHelp::PROCESSENTRY32 = ToolHelp::PROCESSENTRY32::default();
-           process.dwSize = mem::size_of::<ToolHelp::PROCESSENTRY32>() as u32;
+    thread::sleep(Duration::from_secs(5));
 
-           let mut ret = unsafe { ToolHelp::Process32First(h_snapshot, &mut process) };
+    let mut h_snapshot =
+        unsafe { ToolHelp::CreateToolhelp32Snapshot(ToolHelp::TH32CS_SNAPPROCESS, 0) };
 
-           while ret.as_bool() {
-               let mut v = vec![0];
-               for ch in process.szExeFile {
-                   if ch.0 != 0 {
-                       v.push(ch.0);
-                   }
-               }
+    if h_snapshot != Foundation::INVALID_HANDLE_VALUE {
+        let mut process: ToolHelp::PROCESSENTRY32 = ToolHelp::PROCESSENTRY32::default();
+        process.dwSize = mem::size_of::<ToolHelp::PROCESSENTRY32>() as u32;
 
-               let s = String::from_utf8(v).unwrap();
-               if s.contains("BlackDesert64.exe") {
-                   unsafe { Foundation::CloseHandle(h_snapshot) };
+        let mut ret = unsafe { ToolHelp::Process32First(h_snapshot, &mut process) };
 
-                   h_snapshot = unsafe {
-                       ToolHelp::CreateToolhelp32Snapshot(
-                           ToolHelp::TH32CS_SNAPMODULE,
-                           process.th32ProcessID,
-                       )
-                   };
+        while ret.as_bool() {
+            let mut v = vec![0];
+            for ch in process.szExeFile {
+                if ch.0 != 0 {
+                    v.push(ch.0);
+                }
+            }
 
-                   if h_snapshot != Foundation::INVALID_HANDLE_VALUE {
-                       let mut module: ToolHelp::MODULEENTRY32 = ToolHelp::MODULEENTRY32::default();
-                       module.dwSize = mem::size_of::<ToolHelp::MODULEENTRY32>() as u32;
+            let s = String::from_utf8(v).unwrap();
+            if s.contains("BlackDesert64.exe") {
+                unsafe { Foundation::CloseHandle(h_snapshot) };
 
-                       ret = unsafe { ToolHelp::Module32First(h_snapshot, &mut module) };
-                       while ret.as_bool() {
-                           v = vec![];
-                           for ch in process.szExeFile {
-                               if ch.0 != 0 {
-                                   v.push(ch.0);
-                               }
-                           }
+                h_snapshot = unsafe {
+                    ToolHelp::CreateToolhelp32Snapshot(
+                        ToolHelp::TH32CS_SNAPMODULE,
+                        process.th32ProcessID,
+                    )
+                };
 
-                           let s1 = String::from_utf8(v).unwrap();
-                           if s1.contains("BlackDesert64.exe") {
-                               unsafe { Foundation::CloseHandle(h_snapshot) };
+                if h_snapshot != Foundation::INVALID_HANDLE_VALUE {
+                    let mut module: ToolHelp::MODULEENTRY32 = ToolHelp::MODULEENTRY32::default();
+                    module.dwSize = mem::size_of::<ToolHelp::MODULEENTRY32>() as u32;
 
-                               let h_process = unsafe {
-                                   Threading::OpenProcess(
-                                       Threading::PROCESS_ALL_ACCESS,
-                                       false,
-                                       module.th32ProcessID,
-                                   )
-                               };
+                    ret = unsafe { ToolHelp::Module32First(h_snapshot, &mut module) };
+                    while ret.as_bool() {
+                        v = vec![];
+                        for ch in process.szExeFile {
+                            if ch.0 != 0 {
+                                v.push(ch.0);
+                            }
+                        }
 
-                               if h_process != Foundation::INVALID_HANDLE_VALUE {
-                                   let base_address = module.modBaseAddr;
+                        let s1 = String::from_utf8(v).unwrap();
+                        if s1.contains("BlackDesert64.exe") {
+                            unsafe { Foundation::CloseHandle(h_snapshot) };
 
-                                   // Crypto
-                                   let address = unsafe { base_address.add(0x0A29306) };
+                            let h_process = unsafe {
+                                Threading::OpenProcess(
+                                    Threading::PROCESS_ALL_ACCESS,
+                                    false,
+                                    module.th32ProcessID,
+                                )
+                            };
 
-                                   let buffer: *mut c_void = std::ptr::null_mut();
-                                   if !read_patch(h_process, address, buffer) {
-                                       return Err("Crypto Read".to_string());
-                                   }
+                            if h_process != Foundation::INVALID_HANDLE_VALUE {
+                                let base_address = module.modBaseAddr;
 
-                                   let buffer: *mut c_void = std::ptr::null_mut();
-                                   unsafe { std::ptr::write_bytes(buffer, 0x0000090, 2) };
-                                   if !write_patch(h_process, address, buffer) {
-                                       return Err("Crypto Write".to_string());
-                                   }
-                                   //
+                                // Crypto
+                                let address = unsafe { base_address.add(0x0A29306) };
 
-                                   // XC1
-                                   let address = unsafe { base_address.add(0x07A5B0A) };
+                                let buffer: *mut c_void = std::ptr::null_mut();
+                                if !read_patch(h_process, address, buffer) {
+                                    return Err("Crypto Read".to_string());
+                                }
 
-                                   let buffer: *mut c_void = std::ptr::null_mut();
-                                   if !read_patch(h_process, address, buffer) {
-                                       return Err("XC1 Read".to_string());
-                                   }
+                                let buffer: *mut c_void = std::ptr::null_mut();
+                                unsafe { std::ptr::write_bytes(buffer, 0x0000090, 2) };
+                                if !write_patch(h_process, address, buffer) {
+                                    return Err("Crypto Write".to_string());
+                                }
+                                //
 
-                                   let buffer: *mut c_void = std::ptr::null_mut();
-                                   unsafe { std::ptr::write_bytes(buffer, 0x0000090, 2) };
-                                   if !write_patch(h_process, address, buffer) {
-                                       return Err("XC1 Write".to_string());
-                                   }
-                                   //
+                                // XC1
+                                let address = unsafe { base_address.add(0x07A5B0A) };
 
-                                   // XC2
-                                   let address = unsafe { base_address.add(0x07A5BF0) };
+                                let buffer: *mut c_void = std::ptr::null_mut();
+                                if !read_patch(h_process, address, buffer) {
+                                    return Err("XC1 Read".to_string());
+                                }
 
-                                   let buffer: *mut c_void = std::ptr::null_mut();
-                                   if !read_patch(h_process, address, buffer) {
-                                       return Err("XC2 Read".to_string());
-                                   }
+                                let buffer: *mut c_void = std::ptr::null_mut();
+                                unsafe { std::ptr::write_bytes(buffer, 0x0000090, 2) };
+                                if !write_patch(h_process, address, buffer) {
+                                    return Err("XC1 Write".to_string());
+                                }
+                                //
 
-                                   let buffer: *mut c_void = std::ptr::null_mut();
-                                   unsafe { std::ptr::write_bytes(buffer, 0x00000EB, 1) };
-                                   if !write_patch(h_process, address, buffer) {
-                                       return Err("XC2 Write".to_string());
-                                   }
-                                   //
+                                // XC2
+                                let address = unsafe { base_address.add(0x07A5BF0) };
 
-                                   // Wipe IP
-                                   let address = unsafe { base_address.add(0x02B41A38) };
+                                let buffer: *mut c_void = std::ptr::null_mut();
+                                if !read_patch(h_process, address, buffer) {
+                                    return Err("XC2 Read".to_string());
+                                }
 
-                                   let buffer: *mut c_void = std::ptr::null_mut();
-                                   if !read_patch(h_process, address, buffer) {
-                                       return Err("Wipe IP Read".to_string());
-                                   }
+                                let buffer: *mut c_void = std::ptr::null_mut();
+                                unsafe { std::ptr::write_bytes(buffer, 0x00000EB, 1) };
+                                if !write_patch(h_process, address, buffer) {
+                                    return Err("XC2 Write".to_string());
+                                }
+                                //
 
-                                   let buffer: *mut c_void = std::ptr::null_mut();
-                                   unsafe { std::ptr::write_bytes(buffer, 0x0000000, 14) };
-                                   if !write_patch(h_process, address, buffer) {
-                                       return Err("Wipe IP Write".to_string());
-                                   }
-                                   //
+                                // Wipe IP
+                                let address = unsafe { base_address.add(0x02B41A38) };
 
-                                   // IP
-                                   let address = unsafe { base_address.add(0x02B41A38) };
+                                let buffer: *mut c_void = std::ptr::null_mut();
+                                if !read_patch(h_process, address, buffer) {
+                                    return Err("Wipe IP Read".to_string());
+                                }
 
-                                   let buffer: *mut c_void = std::ptr::null_mut();
-                                   if !read_patch(h_process, address, buffer) {
-                                       return Err("IP Read".to_string());
-                                   }
+                                let buffer: *mut c_void = std::ptr::null_mut();
+                                unsafe { std::ptr::write_bytes(buffer, 0x0000000, 14) };
+                                if !write_patch(h_process, address, buffer) {
+                                    return Err("Wipe IP Write".to_string());
+                                }
+                                //
 
-                                   let buffer: *mut c_void = std::ptr::null_mut();
-                                   unsafe {
-                                       for s in "192.168.1.33".bytes() {
-                                           std::ptr::write_bytes(buffer, s, 1);
-                                       }
-                                   }
-                                   if !write_patch(h_process, address, buffer) {
-                                       return Err("IP Write".to_string());
-                                   }
-                                   //
-                               }
+                                // IP
+                                let address = unsafe { base_address.add(0x02B41A38) };
 
-                               break;
-                           }
+                                let buffer: *mut c_void = std::ptr::null_mut();
+                                if !read_patch(h_process, address, buffer) {
+                                    return Err("IP Read".to_string());
+                                }
 
-                           ret = unsafe { ToolHelp::Module32Next(h_snapshot, &mut module) };
-                       }
-                   }
-                   break;
-               }
+                                let buffer: *mut c_void = std::ptr::null_mut();
+                                unsafe {
+                                    for s in "192.168.1.33".bytes() {
+                                        std::ptr::write_bytes(buffer, s, 1);
+                                    }
+                                }
+                                if !write_patch(h_process, address, buffer) {
+                                    return Err("IP Write".to_string());
+                                }
+                                //
+                            }
 
-               ret = unsafe { ToolHelp::Process32Next(h_snapshot, &mut process) };
-           }
-       }
-    */
+                            break;
+                        }
 
-    if h.is_invalid() {
+                        ret = unsafe { ToolHelp::Module32Next(h_snapshot, &mut module) };
+                    }
+                }
+                break;
+            }
+
+            ret = unsafe { ToolHelp::Process32Next(h_snapshot, &mut process) };
+        }
+    }
+
+    if !h.is_invalid() {
         result = true;
     }
 
@@ -359,10 +349,19 @@ fn register_protocol() -> Result<bool, Error> {
 
 #[instrument]
 fn main() -> Result<(), Error> {
-    let file_appender = rolling::daily("E:/Black Desert/Client", "log");
+    let mut path = std::env::current_exe().unwrap();
+    path.pop();
+    std::env::set_current_dir(path)?;
+
+    let file_appender = rolling::daily(".", "log");
     let (non_blocking, _guard) = tracing_appender::non_blocking(file_appender);
     let subscriber = tracing_subscriber::registry()
-        .with(EnvFilter::from_default_env().add_directive(tracing::Level::TRACE.into()))
+        .with(
+            EnvFilter::from_default_env()
+                .add_directive(Level::ERROR.into())
+                .add_directive(Level::WARN.into())
+                .add_directive(Level::INFO.into()),
+        )
         .with(
             fmt::Layer::new().with_writer(io::stdout).event_format(
                 tracing_subscriber::fmt::format()
@@ -382,129 +381,121 @@ fn main() -> Result<(), Error> {
                 )
                 .with_ansi(false),
         );
-    tracing::subscriber::set_global_default(subscriber).expect("Unable to set a global collector");
+    tracing::subscriber::set_global_default(subscriber).expect("unable to set a global collector");
 
-    info!("========== Start ==========");
-
-    info!(
-        "{:?} {:?}",
-        std::env::current_dir().unwrap().display(),
-        std::env::current_exe().unwrap().as_path()
-    );
-
-    let config = Ini::load_from_file("service.ini");
-
-    if config.is_ok() {
-        let c = config.unwrap();
-        let section_service = c.section(Some("SERVICE")).unwrap();
-        let section_gt = c.section(Some("GT")).unwrap();
-        let section_version = c.section(Some("VERSION")).unwrap();
-
-        let config_service = ConfigService {
-            types: section_service.get("TYPE").unwrap().to_string(),
-            res: section_service.get("RES").unwrap().to_string(),
-        };
-        let config_gt = ConfigGt {
-            authentic_domain: section_gt.get("AUTHENTIC_DOMAIN").unwrap().to_string(),
-            authentic_port: section_gt.get("AUTHENTIC_PORT").unwrap().to_string(),
-            patch_url: section_gt.get("PATCH_URL").unwrap().to_string(),
-            view_trade_market_url: section_gt.get("viewTradeMarketUrl").unwrap().to_string(),
-            game_trade_market_url: section_gt.get("gameTradeMarketUrl").unwrap().to_string(),
-        };
-
-        let config_version = ConfigVersion {
-            launcher: section_version.get("launcher").unwrap().to_string(),
-            client: section_version.get("client").unwrap().to_string(),
-            resource: section_version.get("resource").unwrap().to_string(),
-        };
-    } else {
-        let mut c = config.unwrap();
-        c.with_section(Some("SERVICE"))
-            .set("TYPE", "GT")
-            .set("RES", "_EN_");
-
-        c.with_section(Some("GT"))
-            .set("AUTHENTIC_DOMAIN", "127.0.0.1")
-            .set("AUTHENTIC_PORT", "9888")
-            .set(
-                "PATCH_URL",
-                "http://dn.global-lab.playblackdesert.com/UploadData/",
-            )
-            .set(
-                "viewTradeMarketUrl",
-                "https://trade.global-lab.playblackdesert.com/",
-            )
-            .set(
-                "gameTradeMarketUrl",
-                "https://game-trade.global-lab.playblackdesert.com/",
-            );
-        c.write_to_file("service.ini").unwrap();
-    }
+    info!("========== launcher start ==========");
 
     let args: Vec<String> = env::args().collect();
 
-    match args[1].as_str() {
-        // register
-        "register" => {
-            let r = register_protocol().unwrap();
+    // odolauncher://localhost:12347&1&1/
+    if args.len() > 1 && args[1].starts_with("odolauncher://") {
+        let v: Vec<&str> = args[1].split(&['/', '&'][..]).collect();
+        let address: Vec<&str> = v[2].split(&[':'][..]).collect();
 
-            info!(
-                "========== {}",
-                if r {
-                    "register url protocol success!"
-                } else {
-                    "register url protocol fail!"
-                }
-            );
-        }
-        // run 1 1
-        "run" => {
-            let r = run_game(
-                &format!(
-                    "{}/bin64/BlackDesert64.exe",
-                    env::current_dir().unwrap().display()
-                ),
-                &args[1],
-                &args[2],
-            )
-            .unwrap();
+        let config = Ini::load_from_file("service.ini");
 
-            info!(
-                "========== {}",
-                if r {
-                    "launch game client success!"
-                } else {
-                    "launch game client fail!"
-                }
-            );
-        }
-        _ => {
-            // odolauncher://1&1/
-            if args[1].starts_with("odolauncher://") {
-                let v: Vec<&str> = args[1].split(&['/', '&'][..]).collect();
+        if config.is_ok() {
+            let mut c = config.unwrap();
+            let section_service = c.section(Some("SERVICE")).unwrap();
+            let section_gt = c.section(Some("GT")).unwrap();
+            let section_version = c.section(Some("VERSION")).unwrap();
 
-                let r = run_game(
-                    &format!(
-                        "{}/bin64/BlackDesert64.exe",
-                        env::current_dir().unwrap().display()
-                    ),
-                    v[2],
-                    v[3],
+            let config_service = ConfigService {
+                types: section_service.get("TYPE").unwrap().to_string(),
+                res: section_service.get("RES").unwrap().to_string(),
+            };
+
+            let config_gt = ConfigGt {
+                authentic_domain: section_gt.get("AUTHENTIC_DOMAIN").unwrap().to_string(),
+                authentic_port: section_gt.get("AUTHENTIC_PORT").unwrap().to_string(),
+                patch_url: section_gt.get("PATCH_URL").unwrap().to_string(),
+                view_trade_market_url: section_gt.get("viewTradeMarketUrl").unwrap().to_string(),
+                game_trade_market_url: section_gt.get("gameTradeMarketUrl").unwrap().to_string(),
+            };
+
+            let config_version = ConfigVersion {
+                launcher: section_version.get("launcher").unwrap().to_string(),
+                client: section_version.get("client").unwrap().to_string(),
+                resource: section_version.get("resource").unwrap().to_string(),
+            };
+
+            c.with_section(Some("GT"))
+                .set("AUTHENTIC_DOMAIN", address[0])
+                .set("AUTHENTIC_PORT", address[1]);
+
+            c.with_section(Some("VERSION"))
+                .set("launcher", "1.0.0.0")
+                .set("client", "1.0.0.0")
+                .set("resource", "1.0.0.0");
+        } else {
+            let mut c = Ini::new();
+            c.with_section(Some("SERVICE"))
+                .set("TYPE", "GT")
+                .set("RES", "_EN_");
+
+            c.with_section(Some("GT"))
+                .set("AUTHENTIC_DOMAIN", address[0])
+                .set("AUTHENTIC_PORT", address[1])
+                .set(
+                    "PATCH_URL",
+                    "http://dn.global-lab.playblackdesert.com/UploadData/",
                 )
-                .unwrap();
-
-                info!(
-                    "========== {}",
-                    if r {
-                        "launch game client success!"
-                    } else {
-                        "launch game client fail!"
-                    }
+                .set(
+                    "viewTradeMarketUrl",
+                    "https://trade.global-lab.playblackdesert.com/",
+                )
+                .set(
+                    "gameTradeMarketUrl",
+                    "https://game-trade.global-lab.playblackdesert.com/",
                 );
-            }
+
+            c.with_section(Some("VERSION"))
+                .set("launcher", "1.0.0.0")
+                .set("client", "1.0.0.0")
+                .set("resource", "1.0.0.0");
+            c.write_to_file("service.ini").unwrap();
         }
+
+        let r = run_game(
+            &format!(
+                "{}/bin64/BlackDesert64.exe",
+                env::current_dir().unwrap().display()
+            ),
+            v[3],
+            v[4],
+        )
+        .unwrap();
+
+        info!(
+            "========== {}",
+            if r {
+                "launch game client success!"
+            } else {
+                "launch game client fail!"
+            }
+        );
+    } else {
+        let r = register_protocol().unwrap();
+
+        let config = Ini::load_from_file("service.ini").unwrap();
+        let section_gt = config.section(Some("GT")).unwrap();
+        webbrowser::open(&format!(
+            "http://{}:12347",
+            section_gt.get("AUTHENTIC_DOMAIN").unwrap().to_string()
+        ))?;
+
+        info!(
+            "========== {}",
+            if r {
+                "register url protocol success!"
+            } else {
+                "register url protocol fail!"
+            }
+        );
     }
 
-    info!("========== End ==========");
+    info!("========== launcher end ==========");
+
+    thread::sleep(Duration::from_secs(3));
     Ok(())
 }

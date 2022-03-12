@@ -5,14 +5,26 @@ edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+[build-dependencies]
+embed-resource = "*"
+
 [dependencies]
-log = "*"
-log4rs = "*"
+tracing = "*"
+tracing-appender = "*"
+tracing-subscriber = { version = "*", features = ["env-filter"]}
+tracing-futures = "*"
+tracing-actix-web = "*"
+tracing-unwrap = "*"
+tracing-log = "*"
 futures = "*"
 actix-web = "*"
 actix-cors = "*"
 actix-session = "*"
-serde = "*"
+actix-files = "*"
+actix-web-httpauth = "*"
+actix-web-grants = { version="3.0.0-BETA.6" }
+jsonwebtoken = "*"
+serde = {version = "*", features = ["derive"] }
 serde_json = "*"
 chrono = { version = "*", features = ["serde"] }
 rand = "*"

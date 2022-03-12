@@ -1,34 +1,32 @@
 <template>
-  <div>
-    <q-toolbar
-      class="rounded-borders"
-      style="background-color: rgba(0, 0, 0, 0.8)"
-    >
-      <q-tabs class="text-white" shrink>
-        <q-route-tab to="/" exact :label="$t('toolbar.news')" />
-        <q-route-tab to="shop" exact :label="$t('toolbar.shop')" />
-        <q-route-tab to="market" exact :label="$t('toolbar.market')" />
-        <q-route-tab to="community" exact :label="$t('toolbar.community')" />
-        <q-route-tab to="download" exact :label="$t('toolbar.download')" />
-      </q-tabs>
+  <q-toolbar
+    class="rounded-borders"
+    style="background-color: rgba(0, 0, 0, 0.8)"
+  >
+    <q-tabs class="text-white" shrink>
+      <q-route-tab to="/" exact :label="$t('toolbar.news')" />
+      <q-route-tab to="shop" exact :label="$t('toolbar.shop')" />
+      <q-route-tab to="market" exact :label="$t('toolbar.market')" />
+      <q-route-tab to="community" exact :label="$t('toolbar.community')" />
+      <q-route-tab to="download" exact :label="$t('toolbar.download')" />
+    </q-tabs>
 
-      <q-space />
+    <q-space />
 
-      <q-select
-        v-model="locale"
-        :options="localeOptions"
-        :label="$t('toolbar.language')"
-        label-color="white"
-        borderless
-        emit-value
-        map-options
-        dark
-        filled
-        square
-        style="width: 150px; margin-left: 2%"
-      />
-    </q-toolbar>
-  </div>
+    <q-select
+      v-model="locale"
+      :options="localeOptions"
+      :label="$t('toolbar.language')"
+      label-color="white"
+      borderless
+      emit-value
+      map-options
+      dark
+      filled
+      square
+      style="width: 150px; margin-left: 2%"
+    />
+  </q-toolbar>
 </template>
 
 <script>

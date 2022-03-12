@@ -1,6 +1,6 @@
-use crate::db;
-use actix_session::Session;
-use actix_web::{post, web, Error, HttpRequest, HttpResponse, Result};
+use crate::{claims, db, Conf};
+use actix_web::{get, post, web, Error, HttpRequest, HttpResponse, Result};
+use actix_web_grants::proc_macro::has_permissions;
 use bcrypt;
 use chrono::Local;
 use mongodb::Database;
@@ -10,9 +10,17 @@ use serde_json::{json, Value};
 #[post("/user/register")]
 async fn register(
     req: web::Json<Value>,
-    info: HttpRequest,
+    http_req: HttpRequest,
     db: web::Data<Database>,
+    conf: web::Data<Conf>,
 ) -> Result<HttpResponse, Error> {
+    if !conf.register {
+        return Ok(HttpResponse::Ok().json(json!({
+            "status": "0",
+            "msg": "closed register".to_string()
+        })));
+    }
+
     if db::user::get_user(req["username"].as_str().unwrap(), &db)
         .await
         .unwrap()
@@ -45,7 +53,7 @@ async fn register(
             registration_date: Local::now().timestamp_millis(),
             wait_check: false,
             pc_code: None,
-            host: info
+            host: http_req
                 .connection_info()
                 .peer_addr()
                 .unwrap_or_default()
@@ -139,9 +147,17 @@ async fn login(req: web::Json<Value>, db: web::Data<Database>) -> Result<HttpRes
         .unwrap();
 
         if result {
+            let claims = claims::Claims::new(
+                req["username"].as_str().unwrap().to_string(),
+                req["password"].as_str().unwrap().to_string(),
+                vec!["TEST".to_string()],
+            );
+            let jwt = claims::create_jwt(claims)?;
+
             Ok(HttpResponse::Ok().json(json!({
                 "status": "1",
-                "msg": "success"
+                "msg": "loginin",
+                "token": jwt
             })))
         } else {
             Ok(HttpResponse::Ok().json(json!({
@@ -155,4 +171,28 @@ async fn login(req: web::Json<Value>, db: web::Data<Database>) -> Result<HttpRes
             "msg": "error"
         })))
     }
+}
+
+#[post("/user/loginout")]
+async fn loginout() -> Result<HttpResponse, Error> {
+    Ok(HttpResponse::Ok().json(json!({
+        "status": "1",
+        "msg": "loginout"
+    })))
+}
+
+#[get("/user/{user_name}")]
+#[has_permissions("TEST")]
+async fn info(path: web::Path<String>, db: web::Data<Database>) -> Result<HttpResponse, Error> {
+    let result = db::user::get_user(&path.into_inner(), &db).await.unwrap();
+    let info = result.get(0).unwrap();
+
+    Ok(HttpResponse::Ok().json(json!({
+        "status": "1",
+        "msg": {
+            "family": info.family,
+            "cash": info.cash,
+            "access_level": info.account_name
+        }
+    })))
 }

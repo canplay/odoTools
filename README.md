@@ -1,4 +1,4 @@
-# Odo Server Toolbox ( WIP )
+# Odo Toolbox ( WIP )
 
 > - ## Website
 >   - news

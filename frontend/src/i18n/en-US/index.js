@@ -4,14 +4,16 @@
 export default {
   title: "Black Desert",
   back: "Go Home",
-  search: "search",
+  search: "Search",
+  download: "Download now",
   toolbar: {
     news: "News",
     shop: "Shop",
     market: "Market",
     community: "Community",
-    download: "Download",
-    language: "English",
+    downloads: "Download",
+    language: "Language",
+    admin: "Admin",
   },
   error: {
     404: "Nothing here",
@@ -36,6 +38,7 @@ export default {
     items: "Items",
     outfit: "Outfit",
     equip: "Equip",
+    preview: "Preview",
   },
   user: {
     family: "Family",

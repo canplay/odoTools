@@ -1,14 +1,17 @@
 <template>
   <q-page padding>
     <q-card class="transparent no-box-shadow">
-      <comtoolbar />
+      <comToolbar />
 
       <div style="height: 8px" />
 
-      <q-card-section style="background-color: rgba(0, 0, 0, 0.8)">
-        <q-scroll-area class="text-white" style="height: 400px">
+      <q-card-section
+        style="background-color: rgba(0, 0, 0, 0.8); min-height: 400px"
+        class="text-h1 text-center text-white relative-position"
+      >
+        <div class="absolute-center">
           {{ $t("toolbar.community") }}
-        </q-scroll-area>
+        </div>
       </q-card-section>
     </q-card>
   </q-page>
@@ -16,15 +19,15 @@
 
 <script>
 import { defineComponent } from "vue";
-import comtoolbar from "components/Toolbar.vue";
+import comToolbar from "components/Toolbar";
 
 export default defineComponent({
   name: "PageCommunity",
 
-  setup() {},
-
   components: {
-    comtoolbar,
+    comToolbar,
   },
+
+  setup() {},
 });
 </script>

@@ -8,7 +8,13 @@
       <q-route-tab to="shop" exact :label="$t('toolbar.shop')" />
       <q-route-tab to="market" exact :label="$t('toolbar.market')" />
       <q-route-tab to="community" exact :label="$t('toolbar.community')" />
-      <q-route-tab to="download" exact :label="$t('toolbar.download')" />
+      <q-route-tab to="downloads" exact :label="$t('toolbar.downloads')" />
+      <q-route-tab
+        v-if="$store.state.global.loginin"
+        to="admin"
+        exact
+        :label="$t('toolbar.admin')"
+      />
     </q-tabs>
 
     <q-space />
@@ -30,21 +36,24 @@
 </template>
 
 <script>
-import { defineComponent, ref } from "vue";
+import { defineComponent } from "vue";
 import { useI18n } from "vue-i18n";
 
 export default defineComponent({
   name: "compToolbar",
 
   setup() {
-    const { locale } = useI18n({ useScope: "global" });
-    locale.value = "zh-CN";
+    const { locale } = useI18n({
+      useScope: "global",
+      fallbackLocale: "en-US",
+    });
+    locale.value = navigator.languages[0];
 
     return {
       locale,
       localeOptions: [
-        { value: "zh-CN", label: "简体中文" },
         { value: "en-US", label: "English" },
+        { value: "zh-CN", label: "简体中文" },
       ],
     };
   },

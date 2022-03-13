@@ -2,7 +2,6 @@ use anyhow::Error;
 use futures::stream::TryStreamExt;
 use mongodb::{
     bson::{doc, Bson},
-    options::FindOptions,
     Database,
 };
 use serde::{Deserialize, Serialize};

@@ -173,14 +173,6 @@ async fn login(req: web::Json<Value>, db: web::Data<Database>) -> Result<HttpRes
     }
 }
 
-#[post("/user/loginout")]
-async fn loginout() -> Result<HttpResponse, Error> {
-    Ok(HttpResponse::Ok().json(json!({
-        "status": "1",
-        "msg": "loginout"
-    })))
-}
-
 #[get("/user/{user_name}")]
 #[has_permissions("TEST")]
 async fn info(path: web::Path<String>, db: web::Data<Database>) -> Result<HttpResponse, Error> {

@@ -1,13 +1,25 @@
 # Odo Tools
 
 > - ## Website
->   - news
+>   - news √
 >   - pearl shop
 >   - center market
 >   - register √
 >   - login √
->   - download
+>   - download √
 >   - community
+>   - recharge
+>   - server config
+>   - client delta patch generate
+>   - game event
+>   - game broadcast
+>   - game quest
+>   - game items
+>   - game equip
+>   - game outfit
+>   - game level
+>   - game exp
+>   - etc
 
 > - ## Client Launcher
 >   - xc path
@@ -15,22 +27,6 @@
 >   - support version 2100
 >   - support version 2260 √
 >   - support version 2508
-
-> - ## Server Manager
->   - config
->   - event
->   - delta patch generate
->   - etc
-
-> - ## Gm Tool
->   - broadcast
->   - quest
->   - items
->   - equip
->   - outfit
->   - level
->   - exp
->   - etc
 
 # Build
 

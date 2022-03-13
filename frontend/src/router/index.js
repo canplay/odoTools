@@ -41,7 +41,8 @@ export default route(function ({ store /* , ssrContext */ }) {
       to.path != "/shop" &&
       to.path != "/market" &&
       to.path != "/community" &&
-      to.path != "/download" &&
+      to.path != "/downloads" &&
+      to.path != "/newsview" &&
       !store.state.global.loginin
     ) {
       next("/");

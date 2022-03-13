@@ -92,7 +92,6 @@ async fn main() -> Result<(), Error> {
                 tracing_subscriber::fmt::format()
                     .with_level(true)
                     .with_target(true)
-                    .with_ansi(false)
                     .with_timer(LocalTimer),
             ),
         )
@@ -117,7 +116,7 @@ async fn main() -> Result<(), Error> {
     let mut s = "".to_string();
     f.read_to_string(&mut s)?;
     let config: Conf = serde_json::from_str(&s)?;
-    let conf = config.clone();
+    let config_data: Conf = serde_json::from_str(&s)?;
 
     let client_options;
     if config.mongodb_user != "" && config.mongodb_pwd != "" {
@@ -136,7 +135,7 @@ async fn main() -> Result<(), Error> {
 
     HttpServer::new(move || {
         App::new()
-            .app_data(conf.clone())
+            .app_data(Data::new(config_data.clone()))
             .app_data(Data::new(db.clone()))
             .wrap(TracingLogger::default())
             .wrap(
@@ -163,6 +162,7 @@ async fn main() -> Result<(), Error> {
             .service(index)
             .service(route::user::register)
             .service(route::user::login)
+            .service(route::info::server)
             .service(
                 web::scope("/api")
                     .wrap(HttpAuthentication::bearer(validator))

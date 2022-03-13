@@ -5,13 +5,15 @@ export default {
   title: "黑色沙漠",
   back: "返回",
   search: "搜索",
+  download: "立即下载",
   toolbar: {
     news: "新闻",
     shop: "商城",
     market: "市场",
     community: "社区",
-    download: "下载",
-    language: "全球化",
+    downloads: "下载",
+    language: "语言",
+    admin: "后台",
   },
   error: {
     404: "没有找到此页面",
@@ -36,6 +38,15 @@ export default {
     items: "道具",
     outfit: "时装",
     equip: "装备",
+    preview: "预览",
+    name: "名称",
+    cash: "价格",
+    desc: "说明",
+  },
+  admin: {
+    overview: "概览",
+    database: "数据库",
+    website: "网站",
   },
   user: {
     family: "家族名",

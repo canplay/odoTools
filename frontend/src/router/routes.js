@@ -7,7 +7,13 @@ const routes = [
       { path: "shop", component: () => import("pages/Shop.vue") },
       { path: "market", component: () => import("pages/Market.vue") },
       { path: "community", component: () => import("pages/Community.vue") },
-      { path: "download", component: () => import("pages/Download.vue") },
+      { path: "downloads", component: () => import("pages/Downloads.vue") },
+      {
+        path: "newsview",
+        name: "newsview",
+        component: () => import("pages/NewsView.vue"),
+      },
+      { path: "admin", component: () => import("src/pages/Admin.vue") },
     ],
   },
 

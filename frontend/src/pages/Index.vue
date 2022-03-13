@@ -1,7 +1,7 @@
 <template>
   <q-page padding>
     <q-card class="transparent no-box-shadow">
-      <comtoolbar />
+      <comToolbar />
 
       <div style="height: 8px" />
 
@@ -16,7 +16,12 @@
               <q-scroll-area ref="container1">
                 <q-list>
                   <q-item-section>
-                    <q-item v-for="item in announcements" :key="item" clickable>
+                    <q-item
+                      v-for="item in announcements"
+                      :key="item"
+                      clickable
+                      @click="onView(item)"
+                    >
                       <q-item-section class="ellipsis">
                         {{ item.title }}
                       </q-item-section>
@@ -39,7 +44,12 @@
               <q-scroll-area ref="container2">
                 <q-list>
                   <q-item-section>
-                    <q-item v-for="item in events" :key="item" clickable>
+                    <q-item
+                      v-for="item in events"
+                      :key="item"
+                      clickable
+                      @click="onView(item)"
+                    >
                       <q-item-section class="ellipsis">
                         {{ item.title }}
                       </q-item-section>
@@ -58,20 +68,22 @@
               <q-carousel
                 class="col"
                 animated
-                v-model="slide"
-                :autoplay="autoplay"
+                v-model="carousel.index"
+                :autoplay="carousel.autoplay"
                 infinite
                 thumbnails
                 transition-prev="slide-right"
                 transition-next="slide-left"
-                @mouseenter="autoplay = false"
-                @mouseleave="autoplay = true"
+                @mouseenter="carousel.autoplay = false"
+                @mouseleave="carousel.autoplay = true"
                 style="min-height: 240px"
               >
-                <q-carousel-slide :name="1" img-src="imgs/no-imgs.png" />
-                <q-carousel-slide :name="2" img-src="imgs/no-imgs.png" />
-                <q-carousel-slide :name="3" img-src="imgs/no-imgs.png" />
-                <q-carousel-slide :name="4" img-src="imgs/no-imgs.png" />
+                <q-carousel-slide
+                  :name="index"
+                  v-for="(item, index) in carousel.items"
+                  :key="index"
+                  :img-src="item.img"
+                />
               </q-carousel>
 
               <div class="col-auto" style="height: 8px" />
@@ -189,20 +201,23 @@
 
 <script>
 import { defineComponent, ref } from "vue";
-import comtoolbar from "components/Toolbar.vue";
+import comToolbar from "components/Toolbar";
 import jwt_decode from "jwt-decode";
 
 export default defineComponent({
   name: "PageIndex",
 
   components: {
-    comtoolbar,
+    comToolbar,
   },
 
   setup() {
     return {
-      slide: ref(1),
-      autoplay: ref(true),
+      carousel: ref({
+        autoplay: ref(true),
+        index: 1,
+        items: [],
+      }),
       isPwd: ref(true),
       username: ref(""),
       password: ref(""),
@@ -212,6 +227,26 @@ export default defineComponent({
   },
 
   created() {
+    this.$axios
+      .get(this.$store.state.global.database.config)
+      .then((resp) => {
+        for (let index = 0; index < resp.data.announcements.length; index++) {
+          const element = resp.data.announcements[index];
+          this.announcements.push(element);
+        }
+
+        for (let index = 0; index < resp.data.events.length; index++) {
+          const element = resp.data.events[index];
+          this.events.push(element);
+        }
+
+        this.carousel.items = resp.data.carousel;
+      })
+      .catch((error) => {
+        console.log(error);
+        this.$q.notify(this.$t("error.network"));
+      });
+
     if (
       this.$q.sessionStorage.getItem("canplay") != null &&
       this.$q.sessionStorage.getItem("canplay") != ""
@@ -224,22 +259,6 @@ export default defineComponent({
     this.$nextTick(() => {
       window.addEventListener("resize", this.onResize());
     });
-
-    for (let index = 0; index < 18; index++) {
-      this.announcements.push({
-        title: "1234567890abcdefghijklmnopq",
-        date: "2022-01-01 00:00:00",
-        author: "admin",
-      });
-    }
-
-    for (let index = 0; index < 8; index++) {
-      this.events.push({
-        title: "abcdefghijklmnopq1234567890",
-        date: "2022-01-01 00:00:00",
-        author: "admin",
-      });
-    }
   },
 
   beforeUnmount() {
@@ -333,7 +352,7 @@ export default defineComponent({
 
     onRun() {
       this.$axios
-        .get(this.$store.state.global.backend + "/config.json")
+        .get(this.$store.state.global.database.config)
         .then((resp) => {
           window.location.href =
             "odolauncher://" +
@@ -346,6 +365,13 @@ export default defineComponent({
         .catch(() => {
           this.$q.notify(this.$t("error.launcher"));
         });
+    },
+
+    onView(val) {
+      this.$router.push({
+        name: "newsview",
+        params: { view: JSON.stringify(val) },
+      });
     },
   },
 });

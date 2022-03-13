@@ -51,7 +51,7 @@
 >   - Output dir
 >     - \<your launcher dir or your backend dir\>/target/release
 
-# Development of Useage
+# Useage
 
 > - ## frontend
 >   - Put the files in the \<your frontend dir\>/dist/spa directory into the \<your odo server dir\>/web
@@ -60,21 +60,6 @@
 > - ## launcher
 >   - Place launcher.exe & service.ini in the \<your odo client dir\>
 > - Firewall permits port 12347, modify the database port in \<your odo server dir\>/config.json
-
-# Release of Useage
-
-> - ## server
->   - Put the files in the \<release dir\>/server directory into the \<your odo server dir\>
->   - Startup sequence
->     - database
->     - loginserver
->     - gameserver
->     - backend
-> - ## client
->   - Put the files in the \<release dir\>/client directory into the \<your odo client dir\>
->   - Run launcher.exe
->   - Register or login on the website
->   - Start Game
 
 # NOTE
 

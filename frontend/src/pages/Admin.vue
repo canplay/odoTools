@@ -44,6 +44,7 @@
 
           <template v-slot:after>
             <q-tab-panels
+              class="transparent text-white"
               v-model="tab"
               animated
               swipeable
@@ -51,27 +52,17 @@
               transition-prev="jump-up"
               transition-next="jump-up"
             >
-              <q-tab-panel name="index">
-                <q-card dark>
-                  <q-card-section> IP地址： </q-card-section>
-                </q-card>
+              <q-tab-panel class="transparent" name="index">
+                backend IP：{{ info.url }}
               </q-tab-panel>
 
-              <q-tab-panel name="website">
-                <div class="text-h4 q-mb-md">Mails</div>
-              </q-tab-panel>
+              <q-tab-panel name="website"> </q-tab-panel>
 
-              <q-tab-panel name="database">
-                <div class="text-h4 q-mb-md">Alarms</div>
-              </q-tab-panel>
+              <q-tab-panel name="database"> </q-tab-panel>
 
-              <q-tab-panel name="loginserver">
-                <div class="text-h4 q-mb-md">Movies</div>
-              </q-tab-panel>
+              <q-tab-panel name="loginserver"> </q-tab-panel>
 
-              <q-tab-panel name="gameserver">
-                <div class="text-h4 q-mb-md">Movies</div>
-              </q-tab-panel>
+              <q-tab-panel name="gameserver"> </q-tab-panel>
             </q-tab-panels>
           </template>
         </q-splitter>
@@ -95,7 +86,23 @@ export default defineComponent({
     return {
       splitterModel: ref(10),
       tab: ref("index"),
+      info: ref({}),
     };
+  },
+
+  created() {
+    this.$axios
+      .get(this.$store.state.global.backend + "/api/info/server", {
+        headers: {
+          authorization: "Bearer " + this.$q.sessionStorage.getItem("canplay"),
+        },
+      })
+      .then((resp) => {
+        this.info = resp.data.msg;
+      })
+      .catch(() => {
+        this.$q.notify(this.$t("error.network"));
+      });
   },
 });
 </script>

@@ -162,11 +162,11 @@ async fn main() -> Result<(), Error> {
             .service(index)
             .service(route::user::register)
             .service(route::user::login)
-            .service(route::info::server)
             .service(
                 web::scope("/api")
                     .wrap(HttpAuthentication::bearer(validator))
-                    .service(route::user::info),
+                    .service(route::user::info)
+                    .service(route::info::server),
             )
             .service(fs::Files::new("/", "./web").show_files_listing())
     })

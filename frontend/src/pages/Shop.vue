@@ -14,11 +14,11 @@
           align="justify"
           narrow-indicator
         >
-          <q-tab name="hot" :label="$t('shop.hot')" />
-          <q-tab name="vip" :label="$t('shop.vip')" />
-          <q-tab name="items" :label="$t('shop.items')" />
-          <q-tab name="outfit" :label="$t('shop.outfit')" />
-          <q-tab name="equip" :label="$t('shop.equip')" />
+          <q-tab class="tabs-bold" name="hot" :label="$t('shop.hot')" />
+          <q-tab class="tabs-bold" name="vip" :label="$t('shop.vip')" />
+          <q-tab class="tabs-bold" name="items" :label="$t('shop.items')" />
+          <q-tab class="tabs-bold" name="outfit" :label="$t('shop.outfit')" />
+          <q-tab class="tabs-bold" name="equip" :label="$t('shop.equip')" />
         </q-tabs>
 
         <q-separator />
@@ -48,6 +48,14 @@
     </q-card>
   </q-page>
 </template>
+
+<style lang="sass">
+.tabs-bold
+  .q-tab__content
+    .q-tab__label
+      font-size: 20px
+      font-weight: 900
+</style>
 
 <script>
 import { defineComponent, ref } from "vue";

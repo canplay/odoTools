@@ -10,7 +10,7 @@
 >   - community
 >   - recharge
 >   - server config
->   - client delta patch generate
+>   - client diff patch generate
 >   - game event
 >   - game broadcast
 >   - game quest
@@ -22,8 +22,8 @@
 >   - etc
 
 > - ## Client Launcher
->   - xc path
->   - delta patch
+>   - bypass xc
+>   - diff patch
 >   - support version 2100
 >   - support version 2260 √
 >   - support version 2508

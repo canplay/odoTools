@@ -19,7 +19,6 @@ tracing-log = "*"
 futures = "*"
 actix-web = "*"
 actix-cors = "*"
-actix-session = "*"
 actix-files = "*"
 actix-web-httpauth = "*"
 actix-web-grants = { version="3.0.0-BETA.6" }

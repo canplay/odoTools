@@ -1,8 +1,6 @@
 use actix_cors::Cors;
 use actix_files as fs;
-use actix_session::CookieSession;
 use actix_web::{
-    cookie::time::Duration,
     dev::ServiceRequest,
     get, middleware,
     web::{self, Data},
@@ -146,19 +144,12 @@ async fn main() -> Result<(), Error> {
                     .supports_credentials()
                     .max_age(3600),
             )
-            .wrap(middleware::DefaultHeaders::new().add(("Server", "CaNplay")))
             .wrap(
                 middleware::DefaultHeaders::new()
+                    .add(("Server", "CaNplay"))
                     .add(("date", Local::now().format("%Y-%m-%d %H:%M:%S").to_string())),
             )
             .wrap(middleware::Compress::default())
-            .wrap(
-                CookieSession::signed(&[0; 32])
-                    .name("canplay")
-                    .secure(false)
-                    .http_only(true)
-                    .expires_in_time(Duration::hours(1)),
-            )
             .service(index)
             .service(route::user::register)
             .service(route::user::login)

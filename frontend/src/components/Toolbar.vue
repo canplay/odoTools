@@ -4,7 +4,7 @@
     style="background-color: rgba(0, 0, 0, 0.8)"
   >
     <q-tabs class="text-white" shrink>
-      <q-route-tab to="/" exact :label="$t('toolbar.news')" />
+      <q-route-tab to="/" exact :label="$t('toolbar.index')" />
       <q-route-tab to="shop" exact :label="$t('toolbar.shop')" />
       <q-route-tab to="market" exact :label="$t('toolbar.market')" />
       <q-route-tab to="community" exact :label="$t('toolbar.community')" />

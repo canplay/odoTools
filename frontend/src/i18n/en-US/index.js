@@ -7,7 +7,7 @@ export default {
   search: "Search",
   download: "Download now",
   toolbar: {
-    news: "News",
+    news: "Index",
     shop: "Shop",
     market: "Market",
     community: "Community",

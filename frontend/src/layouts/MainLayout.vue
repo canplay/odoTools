@@ -26,16 +26,15 @@ export default defineComponent({
 
   created() {
     if (
-      this.$q.sessionStorage.getItem("canplay") != null &&
-      this.$q.sessionStorage.getItem("canplay") != ""
+      this.$q.cookies.get("canplay-token") != null &&
+      this.$q.cookies.get("canplay-token") != ""
     ) {
-      let token = jwt_decode(this.$q.sessionStorage.getItem("canplay"));
+      let token = jwt_decode(this.$q.cookies.get("canplay-token"));
 
       this.$axios
         .get(this.$store.state.global.backend + "/api/user/" + token.username, {
           headers: {
-            authorization:
-              "Bearer " + this.$q.sessionStorage.getItem("canplay"),
+            authorization: "Bearer " + this.$q.cookies.get("canplay-token"),
           },
         })
         .then((resp) => {
@@ -57,7 +56,8 @@ export default defineComponent({
         })
         .catch(() => {
           this.$store.commit("global/login", false);
-          this.$q.sessionStorage.set("canplay", "");
+          this.$q.cookies.remove("canplay-token");
+          this.$q.cookies.remove("canplay");
         });
     }
   },

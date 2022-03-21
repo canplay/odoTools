@@ -7,7 +7,7 @@ export default {
   search: "搜索",
   download: "立即下载",
   toolbar: {
-    news: "新闻",
+    index: "首页",
     shop: "商城",
     market: "市场",
     community: "社区",

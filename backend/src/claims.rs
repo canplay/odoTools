@@ -10,16 +10,14 @@ const SECRET: &str = "CANPLAY";
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Claims {
     pub username: String,
-    pub password: String,
     pub permissions: Vec<String>,
     exp: i64,
 }
 
 impl Claims {
-    pub fn new(username: String, password: String, permissions: Vec<String>) -> Self {
+    pub fn new(username: String, permissions: Vec<String>) -> Self {
         Self {
             username,
-            password,
             permissions,
             exp: (Utc::now() + Duration::hours(JWT_EXPIRATION_HOURS)).timestamp(),
         }

@@ -1,6 +1,6 @@
 use crate::{claims, db, Conf};
 use actix_web::{get, post, web, Error, HttpRequest, HttpResponse, Result};
-use actix_web_grants::proc_macro::has_permissions;
+use actix_web_grants::proc_macro::{has_any_permission, has_any_role};
 use bcrypt;
 use chrono::Local;
 use mongodb::Database;
@@ -21,12 +21,8 @@ async fn register(
         })));
     }
 
-    if db::user::get_user(req["username"].as_str().unwrap(), &db)
-        .await
-        .unwrap()
-        .len()
-        > 0
-    {
+    let result = db::user::get_user(req["username"].as_str().unwrap(), &db).await;
+    if result.is_ok() {
         return Ok(HttpResponse::Ok().json(json!({
             "status": "0",
             "msg": "account already exist".to_string()
@@ -128,63 +124,61 @@ async fn register(
     } else {
         Ok(HttpResponse::Ok().json(json!({
             "status": "0",
-            "msg": "error"
+            "msg": "register error"
         })))
     }
 }
 
 #[post("/user/login")]
 async fn login(req: web::Json<Value>, db: web::Data<Database>) -> Result<HttpResponse, Error> {
-    let result = db::user::get_user(req["username"].as_str().unwrap(), &db)
-        .await
-        .unwrap();
+    let result = db::user::get_user(req["username"].as_str().unwrap(), &db).await;
 
-    if result.len() > 0 {
-        let result = bcrypt::verify(
-            req["password"].as_str().unwrap().to_string(),
-            &result[0].password,
-        )
-        .unwrap();
+    if result.is_err() {
+        return Ok(HttpResponse::Ok().json(json!({
+            "status": "0",
+            "msg": "no account"
+        })));
+    }
 
-        if result {
-            let claims = claims::Claims::new(
-                req["username"].as_str().unwrap().to_string(),
-                req["password"].as_str().unwrap().to_string(),
-                vec!["TEST".to_string()],
-            );
-            let jwt = claims::create_jwt(claims)?;
+    let account = result.unwrap();
 
-            Ok(HttpResponse::Ok().json(json!({
-                "status": "1",
-                "msg": "loginin",
-                "token": jwt
-            })))
-        } else {
-            Ok(HttpResponse::Ok().json(json!({
-                "status": "0",
-                "msg": "account or password error"
-            })))
-        }
+    let result = bcrypt::verify(
+        req["password"].as_str().unwrap().to_string(),
+        &account.password,
+    )
+    .unwrap();
+
+    if result {
+        let claims = claims::Claims::new(
+            req["username"].as_str().unwrap().to_string(),
+            vec![account.access_lvl.to_string()],
+        );
+        let jwt = claims::create_jwt(claims)?;
+
+        Ok(HttpResponse::Ok().json(json!({
+            "status": "1",
+            "msg": "loginin",
+            "token": jwt
+        })))
     } else {
         Ok(HttpResponse::Ok().json(json!({
             "status": "0",
-            "msg": "error"
+            "msg": "account or password error"
         })))
     }
 }
 
-#[get("/user/{user_name}")]
-#[has_permissions("TEST")]
+#[get("/user/{username}")]
+#[has_any_permission["1", "2", "3", "4"]]
 async fn info(path: web::Path<String>, db: web::Data<Database>) -> Result<HttpResponse, Error> {
     let result = db::user::get_user(&path.into_inner(), &db).await.unwrap();
-    let info = result.get(0).unwrap();
 
     Ok(HttpResponse::Ok().json(json!({
         "status": "1",
         "msg": {
-            "family": info.family,
-            "cash": info.cash,
-            "access_level": info.account_name
+            "family": result.family,
+            "cash": result.cash,
+            "access_level": result.account_name
         }
     })))
 }

@@ -71,7 +71,7 @@ pub async fn add_user(account: AccountInfo, db: &Database) -> Result<bool, Error
     })
 }
 
-pub async fn get_user(username: &str, db: &Database) -> Result<Vec<AccountInfo>, Error> {
+pub async fn get_user(username: &str, db: &Database) -> Result<AccountInfo, Error> {
     let typed_collection = db.collection::<AccountInfo>("accounts");
     let mut cursor = typed_collection
         .find(doc! { "accountName": username }, None)
@@ -82,5 +82,5 @@ pub async fn get_user(username: &str, db: &Database) -> Result<Vec<AccountInfo>,
         accounts.push(account)
     }
 
-    Ok(accounts)
+    Ok(accounts[0].clone())
 }

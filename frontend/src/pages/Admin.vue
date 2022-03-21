@@ -94,7 +94,7 @@ export default defineComponent({
     this.$axios
       .get(this.$store.state.global.backend + "/api/info/server", {
         headers: {
-          authorization: "Bearer " + this.$q.sessionStorage.getItem("canplay"),
+          authorization: "Bearer " + this.$q.cookies.get("canplay-token"),
         },
       })
       .then((resp) => {

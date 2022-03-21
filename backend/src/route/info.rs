@@ -5,7 +5,7 @@ use serde_json::{json, Value};
 use std::{fs::File, io::Read, path::Path};
 
 #[get("/info/server")]
-#[has_permissions("TEST")]
+#[has_permissions("4")]
 async fn server(conf: web::Data<Conf>) -> Result<HttpResponse, Error> {
     let path = Path::new("./web/config.json");
     let mut f = File::open(path)?;

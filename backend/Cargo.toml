@@ -23,7 +23,7 @@ actix-files = "*"
 actix-web-httpauth = "*"
 actix-web-grants = { version="3.0.0-BETA.6" }
 jsonwebtoken = "*"
-serde = {version = "*", features = ["derive"] }
+serde = "*"
 serde_json = "*"
 chrono = { version = "*", features = ["serde"] }
 rand = "*"

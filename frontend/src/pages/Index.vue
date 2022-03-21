@@ -248,12 +248,12 @@ export default defineComponent({
       });
 
     if (
-      this.$q.sessionStorage.getItem("canplay") != null &&
-      this.$q.sessionStorage.getItem("canplay") != ""
+      this.$q.cookies.get("canplay-token") != null &&
+      this.$q.cookies.get("canplay-token") != ""
     ) {
-      let token = jwt_decode(this.$q.sessionStorage.getItem("canplay"));
+      let token = jwt_decode(this.$q.cookies.get("canplay-token"));
       this.username = token.username;
-      this.password = token.password;
+      this.password = this.$q.cookies.get("canplay");
     }
 
     this.$nextTick(() => {
@@ -302,7 +302,8 @@ export default defineComponent({
           try {
             if (resp.data.msg === "loginin") {
               this.$store.commit("global/login", true);
-              this.$q.sessionStorage.set("canplay", resp.data.token);
+              this.$q.cookies.set("canplay-token", resp.data.token);
+              this.$q.cookies.set("canplay", this.password);
 
               try {
                 this.$axios
@@ -313,7 +314,7 @@ export default defineComponent({
                     {
                       headers: {
                         authorization:
-                          "Bearer " + this.$q.sessionStorage.getItem("canplay"),
+                          "Bearer " + this.$q.cookies.get("canplay-token"),
                       },
                     }
                   )
@@ -347,7 +348,8 @@ export default defineComponent({
 
     onLoginout() {
       this.$store.commit("global/login", false);
-      this.$q.sessionStorage.set("canplay", "");
+      this.$q.cookies.remove("canplay-token");
+      this.$q.cookies.remove("canplay");
     },
 
     onRun() {

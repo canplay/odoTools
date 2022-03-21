@@ -13,7 +13,7 @@
             <div class="col text-h6">{{ item.desc }}</div>
 
             <div class="col-auto text-center text-h6 text-red">
-              <a :href="item.url">{{ $t("download") }}</a>
+              <a :href="item.url" class="text-primary">{{ $t("download") }}</a>
             </div>
           </q-card-section>
         </q-card>

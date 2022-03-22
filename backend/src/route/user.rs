@@ -1,6 +1,6 @@
 use crate::{claims, db, Conf};
 use actix_web::{get, post, web, Error, HttpRequest, HttpResponse, Result};
-use actix_web_grants::proc_macro::{has_any_permission, has_any_role};
+use actix_web_grants::proc_macro::has_any_permission;
 use bcrypt;
 use chrono::Local;
 use mongodb::Database;
@@ -151,6 +151,7 @@ async fn login(req: web::Json<Value>, db: web::Data<Database>) -> Result<HttpRes
     if result {
         let claims = claims::Claims::new(
             req["username"].as_str().unwrap().to_string(),
+            req["password"].as_str().unwrap().to_string(),
             vec![account.access_lvl.to_string()],
         );
         let jwt = claims::create_jwt(claims)?;

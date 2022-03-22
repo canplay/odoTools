@@ -57,7 +57,6 @@ export default defineComponent({
         .catch(() => {
           this.$store.commit("global/login", false);
           this.$q.cookies.remove("canplay-token");
-          this.$q.cookies.remove("canplay");
         });
     }
   },

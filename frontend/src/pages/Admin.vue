@@ -53,10 +53,96 @@
               transition-next="jump-up"
             >
               <q-tab-panel class="transparent" name="index">
-                backend IP：{{ info.url }}
+                <div class="row text-h6">
+                  <div class="col">
+                    数据库状态：{{ info.status.mongodb ? "启动" : "未启动" }}
+                  </div>
+                  <div class="col">
+                    登录服务端状态：{{
+                      info.status.loginserver ? "启动" : "未启动"
+                    }}
+                  </div>
+                  <div class="col">
+                    游戏服务端状态：{{
+                      info.status.gameserver ? "启动" : "未启动"
+                    }}
+                  </div>
+                </div>
               </q-tab-panel>
 
-              <q-tab-panel name="website"> </q-tab-panel>
+              <q-tab-panel name="website">
+                <q-tabs
+                  v-model="website.tab"
+                  class="text-warning"
+                  active-bg-color="grey-9"
+                >
+                  <q-tab
+                    name="announcements"
+                    icon="img:imgs/overview.png"
+                    :label="$t('index.announcement')"
+                  />
+                  <q-tab
+                    name="events"
+                    icon="img:imgs/website.png"
+                    :label="$t('index.event')"
+                  />
+                  <q-tab
+                    name="carousel"
+                    icon="img:imgs/database.png"
+                    :label="$t('index.carousel')"
+                  />
+                  <q-tab
+                    name="downloads"
+                    icon="img:imgs/loginserver.png"
+                    :label="$t('toolbar.downloads')"
+                  />
+                </q-tabs>
+
+                <q-tab-panels
+                  class="transparent text-white"
+                  v-model="website.tab"
+                  animated
+                  swipeable
+                  transition-prev="jump-up"
+                  transition-next="jump-up"
+                >
+                  <q-tab-panel class="transparent" name="announcements">
+                    <q-table
+                      title=""
+                      :rows="website.announcements.rows"
+                      :columns="website.announcements.columns"
+                      row-key="title"
+                    />
+                  </q-tab-panel>
+
+                  <q-tab-panel class="transparent" name="events">
+                    <q-table
+                      title=""
+                      :rows="website.events.rows"
+                      :columns="website.announcements.columns"
+                      row-key="title"
+                    />
+                  </q-tab-panel>
+
+                  <q-tab-panel class="transparent" name="carousel">
+                    <q-table
+                      title=""
+                      :rows="website.carousel.rows"
+                      :columns="website.carousel.columns"
+                      row-key="path"
+                    />
+                  </q-tab-panel>
+
+                  <q-tab-panel class="transparent" name="downloads">
+                    <q-table
+                      title=""
+                      :rows="website.downloads.rows"
+                      :columns="website.downloads.columns"
+                      row-key="name"
+                    />
+                  </q-tab-panel>
+                </q-tab-panels>
+              </q-tab-panel>
 
               <q-tab-panel name="database"> </q-tab-panel>
 
@@ -74,6 +160,7 @@
 <script>
 import { defineComponent, ref } from "vue";
 import comToolbar from "components/Toolbar";
+import { ConfigIniParser } from "config-ini-parser";
 
 export default defineComponent({
   name: "PageAdmin",
@@ -86,7 +173,87 @@ export default defineComponent({
     return {
       splitterModel: ref(10),
       tab: ref("index"),
-      info: ref({}),
+      info: ref({
+        database: "",
+        register: false,
+        thread_num: 0,
+        status: {
+          mongodb: false,
+          loginserver: false,
+          gameserver: false,
+        },
+        dir: "",
+        config: {
+          web: "",
+          loginserver: "",
+          gameserver: "",
+        },
+      }),
+      website: ref({
+        tab: "announcements",
+        announcements: ref({
+          rows: [],
+          columns: [
+            {
+              name: "title",
+              align: "center",
+              label: "标题",
+              field: "title",
+              sortable: true,
+            },
+            {
+              name: "date",
+              align: "center",
+              label: "日期",
+              field: "date",
+              sortable: true,
+            },
+            {
+              name: "content",
+              align: "center",
+              label: "内容",
+              field: "content",
+            },
+          ],
+        }),
+        events: ref({
+          rows: [],
+        }),
+        carousel: ref({
+          rows: [],
+          columns: [
+            {
+              name: "img",
+              align: "center",
+              label: "路径",
+              field: "img",
+            },
+          ],
+        }),
+        downloads: ref({
+          rows: [],
+          columns: [
+            {
+              name: "name",
+              align: "center",
+              label: "名称",
+              field: "name",
+            },
+            {
+              name: "desc",
+              align: "center",
+              label: "说明",
+              field: "desc",
+            },
+            {
+              name: "url",
+              align: "center",
+              label: "网址",
+              field: "url",
+            },
+          ],
+        }),
+      }),
     };
   },
 
@@ -99,8 +266,49 @@ export default defineComponent({
       })
       .then((resp) => {
         this.info = resp.data.msg;
+
+        for (
+          let index = 0;
+          index < this.info.config.web.announcements.length;
+          index++
+        ) {
+          const element = this.info.config.web.announcements[index];
+          this.website.announcements.rows.push(element);
+        }
+
+        for (
+          let index = 0;
+          index < this.info.config.web.events.length;
+          index++
+        ) {
+          const element = this.info.config.web.events[index];
+          this.website.events.rows.push(element);
+        }
+
+        for (
+          let index = 0;
+          index < this.info.config.web.carousel.length;
+          index++
+        ) {
+          const element = this.info.config.web.carousel[index];
+          this.website.carousel.rows.push(element);
+        }
+
+        for (
+          let index = 0;
+          index < this.info.config.web.downloads.length;
+          index++
+        ) {
+          const element = this.info.config.web.downloads[index];
+          this.website.downloads.rows.push(element);
+        }
+
+        let ini = new ConfigIniParser("\n");
+        ini.parse(this.info.config.loginserver);
+        console.log(ini.get(null, "login.game.service.type"));
       })
-      .catch(() => {
+      .catch((e) => {
+        console.log(e);
         this.$q.notify(this.$t("error.network"));
       });
   },

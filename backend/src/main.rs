@@ -157,7 +157,7 @@ async fn main() -> Result<(), Error> {
                 web::scope("/api")
                     .wrap(HttpAuthentication::bearer(validator))
                     .service(route::user::info)
-                    .service(route::info::server),
+                    .service(route::status::server),
             )
             .service(fs::Files::new("/", "./web").show_files_listing())
     })

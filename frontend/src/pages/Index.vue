@@ -253,7 +253,7 @@ export default defineComponent({
     ) {
       let token = jwt_decode(this.$q.cookies.get("canplay-token"));
       this.username = token.username;
-      this.password = this.$q.cookies.get("canplay");
+      this.password = token.password;
     }
 
     this.$nextTick(() => {
@@ -303,7 +303,6 @@ export default defineComponent({
             if (resp.data.msg === "loginin") {
               this.$store.commit("global/login", true);
               this.$q.cookies.set("canplay-token", resp.data.token);
-              this.$q.cookies.set("canplay", this.password);
 
               try {
                 this.$axios
@@ -349,7 +348,6 @@ export default defineComponent({
     onLoginout() {
       this.$store.commit("global/login", false);
       this.$q.cookies.remove("canplay-token");
-      this.$q.cookies.remove("canplay");
     },
 
     onRun() {

@@ -31,3 +31,5 @@ reqwest = { version = "*", features = ["cookies", "gzip", "json"] }
 anyhow = "*"
 mongodb = "*"
 bcrypt = "*"
+rust-ini = "*"
+windows = { version = "*", features = ["Win32_Foundation", "Win32_UI_Shell", "Win32_UI_WindowsAndMessaging", "Win32_System_Diagnostics_ToolHelp", "Win32_System_Threading", "Win32_System_Diagnostics_Debug", "Win32_System_Registry", "Win32_Security"] }

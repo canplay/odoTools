@@ -31,6 +31,7 @@ export default {
     register: "注册",
     run: "启动游戏",
     loginout: "退出",
+    carousel: "滚动图",
   },
   shop: {
     hot: "热卖",

@@ -108,11 +108,72 @@
                 >
                   <q-tab-panel class="transparent" name="announcements">
                     <q-table
-                      title=""
+                      title="公告设置"
+                      class="header-table"
                       :rows="website.announcements.rows"
                       :columns="website.announcements.columns"
                       row-key="title"
-                    />
+                      separator="cell"
+                      selection="multiple"
+                      v-model:selected="website.announcements.selected"
+                    >
+                      <template v-slot:top-right>
+                        <q-btn
+                          color="primary"
+                          :disable="website.loading"
+                          label="删除"
+                          @click="onDelete('announcements')"
+                        />
+                        <q-btn
+                          class="q-ml-sm"
+                          color="primary"
+                          :disable="website.loading"
+                          label="保存"
+                          @click="onSave('announcements')"
+                        />
+                      </template>
+
+                      <template v-slot:body-cell="props">
+                        <q-tr :props="props">
+                          <q-td key="title" :props="props">
+                            {{ props.row.title }}
+                            <q-popup-edit
+                              v-model="props.row.title"
+                              v-slot="scope"
+                            >
+                              <q-input v-model="scope.value" dense autofocus />
+                            </q-popup-edit>
+                          </q-td>
+
+                          <q-td key="date" :props="props">
+                            {{ props.row.date }}
+                            <q-popup-edit
+                              v-model="props.row.date"
+                              v-slot="scope"
+                            >
+                              <q-input v-model="scope.value" dense autofocus />
+                            </q-popup-edit>
+                          </q-td>
+
+                          <q-td key="content" :props="props">
+                            <div class="text-pre-wrap">
+                              {{ props.row.content }}
+                            </div>
+                            <q-popup-edit
+                              v-model="props.row.content"
+                              v-slot="scope"
+                            >
+                              <q-input
+                                type="textarea"
+                                v-model="scope.value"
+                                dense
+                                autofocus
+                              />
+                            </q-popup-edit>
+                          </q-td>
+                        </q-tr>
+                      </template>
+                    </q-table>
                   </q-tab-panel>
 
                   <q-tab-panel class="transparent" name="events">
@@ -157,6 +218,22 @@
   </q-page>
 </template>
 
+<style lang="sass">
+.header-table
+  height: 310px
+
+  .q-table__top,
+  .q-table__bottom,
+  thead tr th
+    position: sticky
+    z-index: 1
+  thead tr:first-child th
+    top: 0
+
+  &.q-table--loading thead tr:last-child th
+    top: 48px
+</style>
+
 <script>
 import { defineComponent, ref } from "vue";
 import comToolbar from "components/Toolbar";
@@ -190,8 +267,10 @@ export default defineComponent({
         },
       }),
       website: ref({
+        loading: false,
         tab: "announcements",
         announcements: ref({
+          selected: [],
           rows: [],
           columns: [
             {
@@ -217,9 +296,11 @@ export default defineComponent({
           ],
         }),
         events: ref({
+          selected: [],
           rows: [],
         }),
         carousel: ref({
+          selected: [],
           rows: [],
           columns: [
             {
@@ -231,6 +312,7 @@ export default defineComponent({
           ],
         }),
         downloads: ref({
+          selected: [],
           rows: [],
           columns: [
             {

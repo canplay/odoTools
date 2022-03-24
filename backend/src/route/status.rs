@@ -82,7 +82,6 @@ async fn server(conf: web::Data<Conf>) -> Result<HttpResponse, Error> {
     Ok(HttpResponse::Ok().json(json!({
         "status": "1",
         "msg": {
-            "url": conf.url,
             "database": conf.mongodb_host,
             "register": conf.register,
             "thread_num": conf.thread_num,

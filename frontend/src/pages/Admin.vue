@@ -32,12 +32,12 @@
               <q-tab
                 name="loginserver"
                 icon="img:imgs/loginserver.png"
-                label="Login Server"
+                :label="$t('admin.loginserver')"
               />
               <q-tab
                 name="gameserver"
                 icon="img:imgs/gameserver.png"
-                label="Game Server"
+                :label="$t('admin.gameserver')"
               />
             </q-tabs>
           </template>
@@ -55,16 +55,18 @@
               <q-tab-panel class="transparent" name="index">
                 <div class="row text-h6">
                   <div class="col">
-                    数据库状态：{{ info.status.mongodb ? "启动" : "未启动" }}
-                  </div>
-                  <div class="col">
-                    登录服务端状态：{{
-                      info.status.loginserver ? "启动" : "未启动"
+                    {{ $t("admin.database") }}{{ $t("status") }}：{{
+                      info.status.mongodb ? $t("runing") : $t("stoping")
                     }}
                   </div>
                   <div class="col">
-                    游戏服务端状态：{{
-                      info.status.gameserver ? "启动" : "未启动"
+                    {{ $t("admin.loginserver") }}{{ $t("status") }}：{{
+                      info.status.loginserver ? $t("runing") : $t("stoping")
+                    }}
+                  </div>
+                  <div class="col">
+                    {{ $t("admin.gameserver") }}{{ $t("status") }}：{{
+                      info.status.gameserver ? $t("runing") : $t("stoping")
                     }}
                   </div>
                 </div>
@@ -73,29 +75,16 @@
               <q-tab-panel name="website">
                 <q-tabs
                   v-model="website.tab"
-                  class="text-warning"
+                  class="text-primary"
                   active-bg-color="grey-9"
                 >
                   <q-tab
                     name="announcements"
-                    icon="img:imgs/overview.png"
                     :label="$t('index.announcement')"
                   />
-                  <q-tab
-                    name="events"
-                    icon="img:imgs/website.png"
-                    :label="$t('index.event')"
-                  />
-                  <q-tab
-                    name="carousel"
-                    icon="img:imgs/database.png"
-                    :label="$t('index.carousel')"
-                  />
-                  <q-tab
-                    name="downloads"
-                    icon="img:imgs/loginserver.png"
-                    :label="$t('toolbar.downloads')"
-                  />
+                  <q-tab name="events" :label="$t('index.event')" />
+                  <q-tab name="carousel" :label="$t('index.carousel')" />
+                  <q-tab name="downloads" :label="$t('toolbar.downloads')" />
                 </q-tabs>
 
                 <q-tab-panels
@@ -108,38 +97,60 @@
                 >
                   <q-tab-panel class="transparent" name="announcements">
                     <q-table
-                      title="公告设置"
+                      :title="$t('index.announcement') + $t('list')"
                       class="header-table"
                       :rows="website.announcements.rows"
-                      :columns="website.announcements.columns"
+                      :columns="news"
                       row-key="title"
                       separator="cell"
                       selection="multiple"
                       v-model:selected="website.announcements.selected"
+                      style="min-height: 406px"
                     >
                       <template v-slot:top-right>
-                        <q-btn
-                          color="primary"
-                          :disable="website.loading"
-                          label="删除"
-                          @click="onDelete('announcements')"
-                        />
                         <q-btn
                           class="q-ml-sm"
                           color="primary"
                           :disable="website.loading"
-                          label="保存"
+                          :label="$t('add')"
+                          @click="onAdd('announcements')"
+                        />
+
+                        <q-btn
+                          class="q-ml-sm"
+                          color="red"
+                          :disable="
+                            website.loading ||
+                            website.announcements.selected.length === 0
+                          "
+                          :label="$t('delete')"
+                          @click="onDelete('announcements')"
+                        />
+
+                        <q-btn
+                          class="q-ml-sm"
+                          color="primary"
+                          :disable="
+                            website.loading ||
+                            website.announcements.selected.length === 0
+                          "
+                          :label="$t('save')"
                           @click="onSave('announcements')"
                         />
                       </template>
 
-                      <template v-slot:body-cell="props">
+                      <template v-slot:body="props">
                         <q-tr :props="props">
+                          <q-td class="text-center">
+                            <q-checkbox dense v-model="props.selected" />
+                          </q-td>
+
                           <q-td key="title" :props="props">
                             {{ props.row.title }}
                             <q-popup-edit
                               v-model="props.row.title"
                               v-slot="scope"
+                              auto-save
                             >
                               <q-input v-model="scope.value" dense autofocus />
                             </q-popup-edit>
@@ -150,6 +161,7 @@
                             <q-popup-edit
                               v-model="props.row.date"
                               v-slot="scope"
+                              auto-save
                             >
                               <q-input v-model="scope.value" dense autofocus />
                             </q-popup-edit>
@@ -162,6 +174,7 @@
                             <q-popup-edit
                               v-model="props.row.content"
                               v-slot="scope"
+                              auto-save
                             >
                               <q-input
                                 type="textarea"
@@ -178,29 +191,261 @@
 
                   <q-tab-panel class="transparent" name="events">
                     <q-table
-                      title=""
+                      :title="$t('index.event') + $t('list')"
+                      class="header-table"
                       :rows="website.events.rows"
-                      :columns="website.announcements.columns"
+                      :columns="news"
                       row-key="title"
-                    />
+                      separator="cell"
+                      selection="multiple"
+                      v-model:selected="website.events.selected"
+                      style="min-height: 406px"
+                    >
+                      <template v-slot:top-right>
+                        <q-btn
+                          class="q-ml-sm"
+                          color="primary"
+                          :disable="website.loading"
+                          :label="$t('add')"
+                          @click="onAdd('events')"
+                        />
+
+                        <q-btn
+                          class="q-ml-sm"
+                          color="red"
+                          :disable="
+                            website.loading ||
+                            website.events.selected.length === 0
+                          "
+                          :label="$t('delete')"
+                          @click="onDelete('events')"
+                        />
+
+                        <q-btn
+                          class="q-ml-sm"
+                          color="primary"
+                          :disable="
+                            website.loading ||
+                            website.events.selected.length === 0
+                          "
+                          :label="$t('save')"
+                          @click="onSave('events')"
+                        />
+                      </template>
+
+                      <template v-slot:body="props">
+                        <q-tr :props="props">
+                          <q-td class="text-center">
+                            <q-checkbox dense v-model="props.selected" />
+                          </q-td>
+
+                          <q-td key="title" :props="props">
+                            {{ props.row.title }}
+                            <q-popup-edit
+                              v-model="props.row.title"
+                              v-slot="scope"
+                              auto-save
+                            >
+                              <q-input v-model="scope.value" dense autofocus />
+                            </q-popup-edit>
+                          </q-td>
+
+                          <q-td key="date" :props="props">
+                            {{ props.row.date }}
+                            <q-popup-edit
+                              v-model="props.row.date"
+                              v-slot="scope"
+                              auto-save
+                            >
+                              <q-input v-model="scope.value" dense autofocus />
+                            </q-popup-edit>
+                          </q-td>
+
+                          <q-td key="content" :props="props">
+                            <div class="text-pre-wrap">
+                              {{ props.row.content }}
+                            </div>
+                            <q-popup-edit
+                              v-model="props.row.content"
+                              v-slot="scope"
+                              auto-save
+                            >
+                              <q-input
+                                type="textarea"
+                                v-model="scope.value"
+                                dense
+                                autofocus
+                              />
+                            </q-popup-edit>
+                          </q-td>
+                        </q-tr>
+                      </template>
+                    </q-table>
                   </q-tab-panel>
 
                   <q-tab-panel class="transparent" name="carousel">
                     <q-table
-                      title=""
+                      :title="$t('index.carousel') + $t('list')"
+                      class="header-table"
                       :rows="website.carousel.rows"
-                      :columns="website.carousel.columns"
-                      row-key="path"
-                    />
+                      :columns="carousel"
+                      row-key="img"
+                      separator="cell"
+                      selection="multiple"
+                      v-model:selected="website.carousel.selected"
+                      style="min-height: 406px"
+                    >
+                      <template v-slot:top-right>
+                        <q-btn
+                          class="q-ml-sm"
+                          color="primary"
+                          :disable="website.loading"
+                          :label="$t('add')"
+                          @click="onAdd('carousel')"
+                        />
+
+                        <q-btn
+                          class="q-ml-sm"
+                          color="red"
+                          :disable="
+                            website.loading ||
+                            website.carousel.selected.length === 0
+                          "
+                          :label="$t('delete')"
+                          @click="onDelete('carousel')"
+                        />
+
+                        <q-btn
+                          class="q-ml-sm"
+                          color="primary"
+                          :disable="
+                            website.loading ||
+                            website.carousel.selected.length === 0
+                          "
+                          :label="$t('save')"
+                          @click="onSave('carousel')"
+                        />
+                      </template>
+
+                      <template v-slot:body="props">
+                        <q-tr :props="props">
+                          <q-td class="text-center">
+                            <q-checkbox dense v-model="props.selected" />
+                          </q-td>
+
+                          <q-td key="img" :props="props">
+                            {{ props.row.img }}
+                            <q-popup-edit
+                              v-model="props.row.img"
+                              v-slot="scope"
+                              auto-save
+                            >
+                              <q-input v-model="scope.value" dense autofocus />
+                            </q-popup-edit>
+                          </q-td>
+
+                          <q-td key="url" :props="props">
+                            {{ props.row.url }}
+                            <q-popup-edit
+                              v-model="props.row.url"
+                              v-slot="scope"
+                              auto-save
+                            >
+                              <q-input v-model="scope.value" dense autofocus />
+                            </q-popup-edit>
+                          </q-td>
+                        </q-tr>
+                      </template>
+                    </q-table>
                   </q-tab-panel>
 
                   <q-tab-panel class="transparent" name="downloads">
                     <q-table
-                      title=""
+                      :title="$t('toolbar.downloads') + $t('list')"
+                      class="header-table"
                       :rows="website.downloads.rows"
-                      :columns="website.downloads.columns"
-                      row-key="name"
-                    />
+                      :columns="downloads"
+                      row-key="title"
+                      separator="cell"
+                      selection="multiple"
+                      v-model:selected="website.downloads.selected"
+                      style="min-height: 406px"
+                    >
+                      <template v-slot:top-right>
+                        <q-btn
+                          class="q-ml-sm"
+                          color="primary"
+                          :disable="website.loading"
+                          :label="$t('add')"
+                          @click="onAdd('downloads')"
+                        />
+
+                        <q-btn
+                          class="q-ml-sm"
+                          color="red"
+                          :disable="
+                            website.loading ||
+                            website.downloads.selected.length === 0
+                          "
+                          :label="$t('delete')"
+                          @click="onDelete('downloads')"
+                        />
+
+                        <q-btn
+                          class="q-ml-sm"
+                          color="primary"
+                          :disable="
+                            website.loading ||
+                            website.downloads.selected.length === 0
+                          "
+                          :label="$t('save')"
+                          @click="onSave('downloads')"
+                        />
+                      </template>
+
+                      <template v-slot:body="props">
+                        <q-tr :props="props">
+                          <q-td class="text-center">
+                            <q-checkbox dense v-model="props.selected" />
+                          </q-td>
+
+                          <q-td key="title" :props="props">
+                            {{ props.row.title }}
+                            <q-popup-edit
+                              v-model="props.row.title"
+                              v-slot="scope"
+                              auto-save
+                            >
+                              <q-input v-model="scope.value" dense autofocus />
+                            </q-popup-edit>
+                          </q-td>
+
+                          <q-td key="desc" :props="props">
+                            {{ props.row.desc }}
+                            <q-popup-edit
+                              v-model="props.row.desc"
+                              v-slot="scope"
+                              auto-save
+                            >
+                              <q-input v-model="scope.value" dense autofocus />
+                            </q-popup-edit>
+                          </q-td>
+
+                          <q-td key="url" :props="props">
+                            <div class="text-pre-wrap">
+                              {{ props.row.url }}
+                            </div>
+                            <q-popup-edit
+                              v-model="props.row.url"
+                              v-slot="scope"
+                              auto-save
+                            >
+                              <q-input v-model="scope.value" dense autofocus />
+                            </q-popup-edit>
+                          </q-td>
+                        </q-tr>
+                      </template>
+                    </q-table>
                   </q-tab-panel>
                 </q-tab-panels>
               </q-tab-panel>
@@ -270,30 +515,8 @@ export default defineComponent({
         loading: false,
         tab: "announcements",
         announcements: ref({
-          selected: [],
-          rows: [],
-          columns: [
-            {
-              name: "title",
-              align: "center",
-              label: "标题",
-              field: "title",
-              sortable: true,
-            },
-            {
-              name: "date",
-              align: "center",
-              label: "日期",
-              field: "date",
-              sortable: true,
-            },
-            {
-              name: "content",
-              align: "center",
-              label: "内容",
-              field: "content",
-            },
-          ],
+          selected: ref([]),
+          rows: ref([]),
         }),
         events: ref({
           selected: [],
@@ -302,44 +525,122 @@ export default defineComponent({
         carousel: ref({
           selected: [],
           rows: [],
-          columns: [
-            {
-              name: "img",
-              align: "center",
-              label: "路径",
-              field: "img",
-            },
-          ],
         }),
         downloads: ref({
           selected: [],
           rows: [],
-          columns: [
-            {
-              name: "name",
-              align: "center",
-              label: "名称",
-              field: "name",
-            },
-            {
-              name: "desc",
-              align: "center",
-              label: "说明",
-              field: "desc",
-            },
-            {
-              name: "url",
-              align: "center",
-              label: "网址",
-              field: "url",
-            },
-          ],
         }),
       }),
     };
   },
 
+  computed: {
+    news() {
+      return [
+        {
+          name: "title",
+          align: "center",
+          label: this.$t("admin.table.title"),
+          field: "title",
+          sortable: true,
+        },
+        {
+          name: "date",
+          align: "center",
+          label: this.$t("admin.table.date"),
+          field: "date",
+          sortable: true,
+        },
+        {
+          name: "content",
+          align: "center",
+          label: this.$t("admin.table.content"),
+          field: "content",
+        },
+      ];
+    },
+
+    carousel() {
+      return [
+        {
+          name: "img",
+          align: "center",
+          label: this.$t("admin.table.img"),
+          field: "img",
+        },
+        {
+          name: "url",
+          align: "center",
+          label: this.$t("admin.table.url"),
+          field: "url",
+        },
+      ];
+    },
+
+    downloads() {
+      return [
+        {
+          name: "title",
+          align: "center",
+          label: this.$t("admin.table.title"),
+          field: "title",
+        },
+        {
+          name: "desc",
+          align: "center",
+          label: this.$t("admin.table.desc"),
+          field: "desc",
+        },
+        {
+          name: "url",
+          align: "center",
+          label: this.$t("admin.table.url"),
+          field: "url",
+        },
+      ];
+    },
+  },
+
   created() {
+    this.$axios
+      .get(this.$store.state.global.backend + "/website/news")
+      .then((resp) => {
+        for (let index = 0; index < resp.data.msg.length; index++) {
+          const element = resp.data.msg[index];
+
+          if (element.type === "announcements") {
+            this.website.announcements.rows.push(element);
+          } else if (element.type === "events") {
+            this.website.events.rows.push(element);
+          }
+        }
+      });
+
+    this.$axios
+      .get(this.$store.state.global.backend + "/website/carousel")
+      .then((resp) => {
+        for (let index = 0; index < resp.data.msg.length; index++) {
+          const element = resp.data.msg[index];
+          this.website.carousel.rows.push(element);
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+        this.$q.notify(this.$t("error.network"));
+      });
+
+    this.$axios
+      .get(this.$store.state.global.backend + "/website/downloads")
+      .then((resp) => {
+        for (let index = 0; index < resp.data.msg.length; index++) {
+          const element = resp.data.msg[index];
+          this.website.downloads.rows.push(element);
+        }
+      })
+      .catch(() => {
+        this.$q.notify(this.$t("error.network"));
+      });
+
     this.$axios
       .get(this.$store.state.global.backend + "/api/info/server", {
         headers: {
@@ -349,50 +650,85 @@ export default defineComponent({
       .then((resp) => {
         this.info = resp.data.msg;
 
-        for (
-          let index = 0;
-          index < this.info.config.web.announcements.length;
-          index++
-        ) {
-          const element = this.info.config.web.announcements[index];
-          this.website.announcements.rows.push(element);
-        }
-
-        for (
-          let index = 0;
-          index < this.info.config.web.events.length;
-          index++
-        ) {
-          const element = this.info.config.web.events[index];
-          this.website.events.rows.push(element);
-        }
-
-        for (
-          let index = 0;
-          index < this.info.config.web.carousel.length;
-          index++
-        ) {
-          const element = this.info.config.web.carousel[index];
-          this.website.carousel.rows.push(element);
-        }
-
-        for (
-          let index = 0;
-          index < this.info.config.web.downloads.length;
-          index++
-        ) {
-          const element = this.info.config.web.downloads[index];
-          this.website.downloads.rows.push(element);
-        }
-
         let ini = new ConfigIniParser("\n");
-        ini.parse(this.info.config.loginserver);
+        ini.parse(this.info.loginserver);
         console.log(ini.get(null, "login.game.service.type"));
       })
       .catch((e) => {
         console.log(e);
         this.$q.notify(this.$t("error.network"));
       });
+  },
+
+  methods: {
+    onAdd(val) {
+      switch (val) {
+        case "announcements":
+          break;
+        case "events":
+          break;
+        case "carousel":
+          break;
+        case "downloads":
+          break;
+      }
+    },
+
+    onSave(val) {
+      switch (val) {
+        case "announcements":
+          console.log(this.website.announcements.selected);
+          // return;
+
+          this.website.announcements.selected.forEach((element) => {
+            this.$axios
+              .post(
+                this.$store.state.global.backend + "/api/website/news",
+                {
+                  method: "add",
+                  id: element._id.$oid,
+                  title: element.title,
+                  date: element.date,
+                  type: element.type,
+                  content: element.content,
+                },
+                {
+                  headers: {
+                    authorization:
+                      "Bearer " + this.$q.cookies.get("canplay-token"),
+                  },
+                }
+              )
+              .then((resp) => {
+                console.log(resp);
+              })
+              .catch((e) => {
+                console.log(e);
+                this.$q.notify(this.$t("error.network"));
+              });
+          });
+          break;
+        case "events":
+          break;
+        case "carousel":
+          break;
+        case "downloads":
+          break;
+      }
+    },
+
+    onDelete(val) {
+      switch (val) {
+        case "announcements":
+          break;
+        case "events":
+          break;
+        case "carousel":
+          break;
+        case "downloads":
+          break;
+      }
+    },
   },
 });
 </script>

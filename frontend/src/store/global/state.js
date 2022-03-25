@@ -2,10 +2,6 @@ export default function () {
   return {
     backend: "http://127.0.0.1:12347",
     // backend: "",
-    database: {
-      config: "config.json",
-      shop: "shop.json",
-    },
     loginin: false,
     user: {
       family: "",

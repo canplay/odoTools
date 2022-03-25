@@ -41,10 +41,10 @@ export default defineComponent({
 
   created() {
     this.$axios
-      .get(this.$store.state.global.database.config)
+      .get(this.$store.state.global.backend + "/website/downloads")
       .then((resp) => {
-        for (let index = 0; index < resp.data.downloads.length; index++) {
-          const element = resp.data.downloads[index];
+        for (let index = 0; index < resp.data.msg.length; index++) {
+          const element = resp.data.msg[index];
           this.list.push(element);
         }
       })

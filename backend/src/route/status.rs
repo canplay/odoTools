@@ -1,8 +1,8 @@
 use crate::Conf;
-use actix_web::{dev::Server, get, web, Error, HttpResponse};
+use actix_web::{get, web, Error, HttpResponse};
 use actix_web_grants::proc_macro::has_permissions;
 use ini::Ini;
-use serde_json::{json, Value};
+use serde_json::json;
 use std::{fs::File, io::Read, mem, net::TcpListener, path::Path};
 use windows::Win32::{Foundation, System::Diagnostics::ToolHelp};
 
@@ -36,7 +36,7 @@ fn check_process(exe: &str) -> bool {
     return false;
 }
 
-fn check_port(port: i32) -> bool {
+fn check_port(port: i64) -> bool {
     let addr = format!("127.0.0.1:{}", port);
     let listener = TcpListener::bind(addr);
 
@@ -50,13 +50,7 @@ fn check_port(port: i32) -> bool {
 #[get("/info/server")]
 #[has_permissions("4")]
 async fn server(conf: web::Data<Conf>) -> Result<HttpResponse, Error> {
-    let path = Path::new("./web/config.json");
-    let mut f = File::open(path)?;
-    let mut s = "".to_string();
-    f.read_to_string(&mut s)?;
-    let conf_web: Value = serde_json::from_str(&s)?;
-
-    let mongodb_host: Vec<_> = conf.mongodb_host.split(":").collect();
+    let mongodb_host: Vec<_> = conf.mongodb_host[0].split(":").collect();
     let mongodb_port = mongodb_host[1];
 
     let config = Ini::load_from_file("./loginserver/bin/configs/network.properties").unwrap();
@@ -80,22 +74,19 @@ async fn server(conf: web::Data<Conf>) -> Result<HttpResponse, Error> {
     let conf_gameserver = s;
 
     Ok(HttpResponse::Ok().json(json!({
-        "status": "1",
+        "status": 1,
         "msg": {
             "database": conf.mongodb_host,
             "register": conf.register,
             "thread_num": conf.thread_num,
             "status": {
-                "mongodb": check_port(mongodb_port.parse::<i32>().unwrap()),
-                "loginserver": check_port(loginserver_port.parse::<i32>().unwrap()),
-                "gameserver": check_port(gameserver_port.parse::<i32>().unwrap()),
+                "mongodb": check_port(mongodb_port.parse::<i64>().unwrap()),
+                "loginserver": check_port(loginserver_port.parse::<i64>().unwrap()),
+                "gameserver": check_port(gameserver_port.parse::<i64>().unwrap()),
             },
             "dir": std::env::current_dir().unwrap().display().to_string(),
-            "config": {
-                "web": conf_web,
-                "loginserver": conf_loginserver,
-                "gameserver": conf_gameserver
-            }
+            "loginserver": conf_loginserver,
+            "gameserver": conf_gameserver
         }
     })))
 }

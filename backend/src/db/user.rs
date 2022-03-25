@@ -20,9 +20,9 @@ pub struct UiInfo {
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct Macroses {
-    pub index: i32,
+    pub index: i64,
     #[serde(rename = "type")]
-    pub typee: i32,
+    pub typee: i64,
     #[serde(rename = "macrosData")]
     pub macros_data: String,
 }
@@ -38,9 +38,9 @@ pub struct AccountInfo {
     pub pin: String,
     pub family: String,
     #[serde(rename = "accessLvl")]
-    pub access_lvl: i32,
+    pub access_lvl: i64,
     #[serde(rename = "characterSlots")]
-    pub character_slots: i32,
+    pub character_slots: i64,
     pub cash: i64,
     #[serde(rename = "confirmationHash")]
     pub confirmation_hash: String,

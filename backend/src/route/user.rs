@@ -11,20 +11,20 @@ use serde_json::{json, Value};
 async fn register(
     req: web::Json<Value>,
     http_req: HttpRequest,
-    db: web::Data<Database>,
+    db: web::Data<Vec<Database>>,
     conf: web::Data<Conf>,
 ) -> Result<HttpResponse, Error> {
     if !conf.register {
         return Ok(HttpResponse::Ok().json(json!({
-            "status": "0",
+            "status": 0,
             "msg": "closed register".to_string()
         })));
     }
 
-    let result = db::user::get_user(req["username"].as_str().unwrap(), &db).await;
+    let result = db::user::get_user(req["username"].as_str().unwrap(), &db[0]).await;
     if result.is_ok() {
         return Ok(HttpResponse::Ok().json(json!({
-            "status": "0",
+            "status": 0,
             "msg": "account already exist".to_string()
         })));
     }
@@ -41,8 +41,8 @@ async fn register(
             password: hashed.format_for_version(bcrypt::Version::TwoA),
             pin: "3".to_string(),
             family: "".to_string(),
-            access_lvl: 1i32,
-            character_slots: 0i32,
+            access_lvl: 1i64,
+            character_slots: 0i64,
             cash: 0i64,
             confirmation_hash: "".to_string(),
             change_password_hash: "".to_string(),
@@ -60,82 +60,82 @@ async fn register(
             ui_info: db::user::UiInfo { ui_data: None },
             macroses: vec![
                 db::user::Macroses {
-                    index: 0i32,
-                    typee: 3i32,
+                    index: 0i64,
+                    typee: 3i64,
                     macros_data: "".to_string(),
                 },
                 db::user::Macroses {
-                    index: 1i32,
-                    typee: 3i32,
+                    index: 1i64,
+                    typee: 3i64,
                     macros_data: "".to_string(),
                 },
                 db::user::Macroses {
-                    index: 2i32,
-                    typee: 3i32,
+                    index: 2i64,
+                    typee: 3i64,
                     macros_data: "".to_string(),
                 },
                 db::user::Macroses {
-                    index: 3i32,
-                    typee: 3i32,
+                    index: 3i64,
+                    typee: 3i64,
                     macros_data: "".to_string(),
                 },
                 db::user::Macroses {
-                    index: 4i32,
-                    typee: 3i32,
+                    index: 4i64,
+                    typee: 3i64,
                     macros_data: "".to_string(),
                 },
                 db::user::Macroses {
-                    index: 5i32,
-                    typee: 3i32,
+                    index: 5i64,
+                    typee: 3i64,
                     macros_data: "".to_string(),
                 },
                 db::user::Macroses {
-                    index: 6i32,
-                    typee: 3i32,
+                    index: 6i64,
+                    typee: 3i64,
                     macros_data: "".to_string(),
                 },
                 db::user::Macroses {
-                    index: 7i32,
-                    typee: 3i32,
+                    index: 7i64,
+                    typee: 3i64,
                     macros_data: "".to_string(),
                 },
                 db::user::Macroses {
-                    index: 8i32,
-                    typee: 3i32,
+                    index: 8i64,
+                    typee: 3i64,
                     macros_data: "".to_string(),
                 },
                 db::user::Macroses {
-                    index: 9i32,
-                    typee: 3i32,
+                    index: 9i64,
+                    typee: 3i64,
                     macros_data: "".to_string(),
                 },
             ],
         },
-        &db,
+        &db[0],
     )
     .await
     .unwrap();
 
     if result {
         Ok(HttpResponse::Ok().json(json!({
-            "status": "1",
+            "status": 1,
             "msg": result
         })))
     } else {
         Ok(HttpResponse::Ok().json(json!({
-            "status": "0",
+            "status": 0,
             "msg": "register error"
         })))
     }
 }
 
 #[post("/user/login")]
-async fn login(req: web::Json<Value>, db: web::Data<Database>) -> Result<HttpResponse, Error> {
-    let result = db::user::get_user(req["username"].as_str().unwrap(), &db).await;
+async fn login(req: web::Json<Value>, db: web::Data<Vec<Database>>) -> Result<HttpResponse, Error> {
+    let result = db::user::get_user(req["username"].as_str().unwrap(), &db[0]).await;
 
     if result.is_err() {
         return Ok(HttpResponse::Ok().json(json!({
-            "status": "0",
+            "status": 0,
             "msg": "no account"
         })));
     }
@@ -157,13 +157,13 @@ async fn login(req: web::Json<Value>, db: web::Data<Database>) -> Result<HttpRes
         let jwt = claims::create_jwt(claims)?;
 
         Ok(HttpResponse::Ok().json(json!({
-            "status": "1",
+            "status": 1,
             "msg": "loginin",
             "token": jwt
         })))
     } else {
         Ok(HttpResponse::Ok().json(json!({
-            "status": "0",
+            "status": 0,
             "msg": "account or password error"
         })))
     }
@@ -171,11 +171,16 @@ async fn login(req: web::Json<Value>, db: web::Data<Database>) -> Result<HttpRes
 
 #[get("/user/{username}")]
 #[has_any_permission["1", "2", "3", "4"]]
-async fn info(path: web::Path<String>, db: web::Data<Database>) -> Result<HttpResponse, Error> {
-    let result = db::user::get_user(&path.into_inner(), &db).await.unwrap();
+async fn info(
+    path: web::Path<String>,
+    db: web::Data<Vec<Database>>,
+) -> Result<HttpResponse, Error> {
+    let result = db::user::get_user(&path.into_inner(), &db[0])
+        .await
+        .unwrap();
 
     Ok(HttpResponse::Ok().json(json!({
-        "status": "1",
+        "status": 1,
         "msg": {
             "family": result.family,
             "cash": result.cash,

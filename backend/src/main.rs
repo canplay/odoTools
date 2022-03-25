@@ -42,10 +42,10 @@ pub struct Conf {
     pub mysql_name: String,
     pub mysql_user: String,
     pub mysql_pwd: String,
-    pub mongodb_host: String,
-    pub mongodb_name: String,
-    pub mongodb_user: String,
-    pub mongodb_pwd: String,
+    pub mongodb_host: Vec<String>,
+    pub mongodb_name: Vec<String>,
+    pub mongodb_user: Vec<String>,
+    pub mongodb_pwd: Vec<String>,
     pub refresh_rate: u64,
     pub register: bool,
     pub thread_num: usize,
@@ -116,18 +116,25 @@ async fn main() -> Result<(), Error> {
     let config: Conf = serde_json::from_str(&s)?;
     let config_data: Conf = serde_json::from_str(&s)?;
 
-    let client_options;
-    if config.mongodb_user != "" && config.mongodb_pwd != "" {
-        client_options = ClientOptions::parse(format!(
-            "mongodb://{}:{}@{}",
-            config.mongodb_user, config.mongodb_pwd, config.mongodb_host
-        ))
-        .await?;
-    } else {
-        client_options = ClientOptions::parse(format!("mongodb://{}", config.mongodb_host)).await?;
+    let mut db = vec![];
+
+    for element in 0..config.mongodb_host.len() {
+        let client_options;
+        if config.mongodb_user[element] != "" && config.mongodb_pwd[element] != "" {
+            client_options = ClientOptions::parse(format!(
+                "mongodb://{}:{}@{}",
+                config.mongodb_user[element],
+                config.mongodb_pwd[element],
+                config.mongodb_host[element]
+            ))
+            .await?;
+        } else {
+            client_options =
+                ClientOptions::parse(format!("mongodb://{}", config.mongodb_host[element])).await?;
+        }
+        let client = Client::with_options(client_options)?;
+        db.push(client.database(format!("{}", config.mongodb_name[element]).as_str()));
     }
-    let client = Client::with_options(client_options)?;
-    let db = client.database(format!("{}", config.mongodb_name).as_str());
 
     info!("========== {} ==========", config.url);
 
@@ -153,9 +160,15 @@ async fn main() -> Result<(), Error> {
             .service(index)
             .service(route::user::register)
             .service(route::user::login)
+            .service(route::website::news)
+            .service(route::website::carousel)
+            .service(route::website::downloads)
+            .service(route::website::shop)
+            .service(route::website::config)
             .service(
                 web::scope("/api")
                     .wrap(HttpAuthentication::bearer(validator))
+                    .service(route::website::news_admin)
                     .service(route::user::info)
                     .service(route::status::server),
             )

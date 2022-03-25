@@ -16,9 +16,8 @@
         >
           <q-tab class="tabs-bold" name="hot" :label="$t('shop.hot')" />
           <q-tab class="tabs-bold" name="vip" :label="$t('shop.vip')" />
-          <q-tab class="tabs-bold" name="items" :label="$t('shop.items')" />
+          <q-tab class="tabs-bold" name="item" :label="$t('shop.items')" />
           <q-tab class="tabs-bold" name="outfit" :label="$t('shop.outfit')" />
-          <q-tab class="tabs-bold" name="equip" :label="$t('shop.equip')" />
         </q-tabs>
 
         <q-separator />
@@ -32,16 +31,12 @@
             <compShopTable :columns="columns" :rows="rows.vip" />
           </q-tab-panel>
 
-          <q-tab-panel name="items">
-            <compShopTable :columns="columns" :rows="rows.items" />
+          <q-tab-panel name="item">
+            <compShopTable :columns="columns" :rows="rows.item" />
           </q-tab-panel>
 
           <q-tab-panel name="outfit">
             <compShopTable :columns="columns" :rows="rows.outfit" />
-          </q-tab-panel>
-
-          <q-tab-panel name="equip">
-            <compShopTable :columns="columns" :rows="rows.equip" />
           </q-tab-panel>
         </q-tab-panels>
       </q-card-section>
@@ -76,9 +71,8 @@ export default defineComponent({
       rows: ref({
         hot: [],
         vip: [],
-        items: [],
+        item: [],
         outfit: [],
-        equip: [],
       }),
       filter: ref(""),
     };
@@ -119,31 +113,25 @@ export default defineComponent({
 
   created() {
     this.$axios
-      .get(this.$store.state.global.database.shop)
+      .get(this.$store.state.global.backend + "/website/shop")
       .then((resp) => {
-        for (let index = 0; index < resp.data.hot.length; index++) {
-          const element = resp.data.hot[index];
-          this.rows.hot.push(element);
-        }
+        for (let index = 0; index < resp.data.msg.length; index++) {
+          const element = resp.data.msg[index];
 
-        for (let index = 0; index < resp.data.vip.length; index++) {
-          const element = resp.data.vip[index];
-          this.rows.vip.push(element);
-        }
-
-        for (let index = 0; index < resp.data.items.length; index++) {
-          const element = resp.data.items[index];
-          this.rows.items.push(element);
-        }
-
-        for (let index = 0; index < resp.data.outfit.length; index++) {
-          const element = resp.data.outfit[index];
-          this.rows.outfit.push(element);
-        }
-
-        for (let index = 0; index < resp.data.equip.length; index++) {
-          const element = resp.data.equip[index];
-          this.rows.equip.push(element);
+          switch (element.type) {
+            case "hot":
+              this.rows.hot.push(element);
+              break;
+            case "vip":
+              this.rows.vip.push(element);
+              break;
+            case "item":
+              this.rows.item.push(element);
+              break;
+            case "outfit":
+              this.rows.outfit.push(element);
+              break;
+          }
         }
       })
       .catch(() => {

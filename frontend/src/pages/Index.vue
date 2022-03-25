@@ -228,19 +228,33 @@ export default defineComponent({
 
   created() {
     this.$axios
-      .get(this.$store.state.global.database.config)
+      .get(this.$store.state.global.backend + "/website/news")
       .then((resp) => {
-        for (let index = 0; index < resp.data.announcements.length; index++) {
-          const element = resp.data.announcements[index];
-          this.announcements.push(element);
-        }
+        for (let index = 0; index < resp.data.msg.length; index++) {
+          const element = resp.data.msg[index];
 
-        for (let index = 0; index < resp.data.events.length; index++) {
-          const element = resp.data.events[index];
-          this.events.push(element);
+          switch (element.type) {
+            case "announcements":
+              this.announcements.push(element);
+              break;
+            case "events":
+              this.events.push(element);
+              break;
+          }
         }
+      })
+      .catch((error) => {
+        console.log(error);
+        this.$q.notify(this.$t("error.network"));
+      });
 
-        this.carousel.items = resp.data.carousel;
+    this.$axios
+      .get(this.$store.state.global.backend + "/website/carousel")
+      .then((resp) => {
+        for (let index = 0; index < resp.data.msg.length; index++) {
+          const element = resp.data.msg[index];
+          this.carousel.items.push(element);
+        }
       })
       .catch((error) => {
         console.log(error);
@@ -352,11 +366,11 @@ export default defineComponent({
 
     onRun() {
       this.$axios
-        .get(this.$store.state.global.database.config)
+        .get(this.$store.state.global.backend + "/website/config")
         .then((resp) => {
           window.location.href =
             "odolauncher://" +
-            resp.data.server +
+            resp.data.msg[0].login_server +
             "&" +
             this.username +
             "&" +

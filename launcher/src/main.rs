@@ -22,6 +22,7 @@ use windows::{
 };
 use wry::{
     application::{
+        dpi::{PhysicalSize, Size},
         event::{Event, StartCause, WindowEvent},
         event_loop::{ControlFlow, EventLoop},
         window::WindowBuilder,
@@ -398,9 +399,15 @@ fn main() -> wry::Result<()> {
         .with_title("Launcher")
         .with_resizable(false)
         .with_decorations(false)
+        .with_inner_size(PhysicalSize {
+            width: 1000,
+            height: 600,
+        })
+        .with_transparent(true)
         .build(&event_loop)?;
     let _webview = WebViewBuilder::new(window)?
-        .with_url("file:///E:/Workspaces/odoTools/launcher/index.html")?
+        .with_transparent(true)
+        .with_url("file:///E:/Black Desert/tools/odoTools/launcher/index.html")?
         .build()?;
 
     event_loop.run(move |event, _, control_flow| {

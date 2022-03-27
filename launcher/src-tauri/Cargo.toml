@@ -1,0 +1,32 @@
+[package]
+name = "Launcher"
+version = "0.1.0"
+description = "Launcher"
+authors = ["CaNplay"]
+license = ""
+repository = ""
+default-run = "Launcher"
+edition = "2021"
+rust-version = "1.59"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[build-dependencies]
+tauri-build = { version = "1.0.0-rc.4", features = [] }
+
+[dependencies]
+serde_json = "*"
+serde = { version = "*", features = ["derive"] }
+tauri = { version = "1.0.0-rc.4", features = ["api-all"] }
+tracing = "*"
+tracing-appender = "*"
+tracing-subscriber = { version = "*", features = ["env-filter"] }
+chrono = "*"
+rust-ini = "*"
+anyhow = "*"
+webbrowser = "*"
+windows = { version = "*", features = ["Win32_Foundation", "Win32_UI_Shell", "Win32_UI_WindowsAndMessaging", "Win32_System_Diagnostics_ToolHelp", "Win32_System_Threading", "Win32_System_Diagnostics_Debug", "Win32_System_Registry", "Win32_Security"] }
+
+[features]
+default = [ "custom-protocol" ]
+custom-protocol = [ "tauri/custom-protocol" ]

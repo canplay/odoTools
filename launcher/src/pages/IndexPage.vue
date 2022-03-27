@@ -25,7 +25,6 @@
     <div
       class="absolute-bottom text-white text-h4 justify-center items-center flex"
       style="background-color: #000; height: 110px"
-      ref="status"
     >
       {{ status }}
     </div>
@@ -46,29 +45,23 @@ export default defineComponent({
   },
 
   methods: {
-    onResize() {
-      // this.$refs.bg.style.width = document.querySelector("body").clientWidth;
-      // this.$refs.bg.style.height = document.querySelector("body").clientHeight;
-      console.log(this.$refs.status.style.margin);
-    },
-
     onClose() {
       appWindow.close();
     },
 
-    onStatus() {},
+    onStatus(event) {
+      this.status = event.payload.message;
+    },
   },
 
   mounted() {
-    addEventListener("resize", this.onResize());
-    addEventListener("status", this.onStatus);
+    appWindow.listen("status", this.onStatus);
+
+    appWindow.emit("init");
 
     appWindow.emit("test", { message: "Tauri is awesome!" });
   },
 
-  onBeforeUnmount() {
-    removeEventListener("resize", this.onResize);
-    addEventListener("status", this.onStatus);
-  },
+  onBeforeUnmount() {},
 });
 </script>

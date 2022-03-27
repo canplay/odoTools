@@ -3,7 +3,7 @@
 version = 3
 
 [[package]]
-name = "Launcher"
+name = "OdoLauncher"
 version = "0.1.0"
 dependencies = [
  "anyhow",

@@ -21,12 +21,12 @@
         "icons/icon.icns",
         "icons/icon.ico"
       ],
-      "resources": [],
+      "resources": ["./OdoLauncher.manifest"],
       "externalBin": [],
-      "copyright": "",
+      "copyright": "Powered by CaNplay",
       "category": "Game",
       "shortDescription": "",
-      "longDescription": "",
+      "longDescription": "Powered by CaNplay",
       "deb": {
         "depends": [],
         "useBootstrapper": false

@@ -1,11 +1,11 @@
 [package]
-name = "OdoLauncher"
+name = "odo_launcher"
 version = "0.1.0"
-description = "Odo Launcher"
+description = "odo_launcher"
 authors = ["CaNplay"]
 license = ""
 repository = ""
-default-run = "OdoLauncher"
+default-run = "odo_launcher"
 edition = "2021"
 rust-version = "1.59"
 

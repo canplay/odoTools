@@ -1,6 +1,6 @@
 {
   "package": {
-    "productName": "Odo Launcher",
+    "productName": "odo_launcher",
     "version": "0.1.0"
   },
   "build": {
@@ -13,7 +13,7 @@
     "bundle": {
       "active": false,
       "targets": "all",
-      "identifier": "com.canplay.odolauncher",
+      "identifier": "com.canplay.odo_launcher",
       "icon": [
         "icons/32x32.png",
         "icons/128x128.png",
@@ -21,7 +21,7 @@
         "icons/icon.icns",
         "icons/icon.ico"
       ],
-      "resources": ["./OdoLauncher.manifest"],
+      "resources": ["./odo_launcher.exe.manifest", "./service.ini"],
       "externalBin": [],
       "copyright": "Powered by CaNplay",
       "category": "Game",

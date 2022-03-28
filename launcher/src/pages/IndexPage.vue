@@ -26,7 +26,7 @@
       class="absolute-bottom text-white text-h4 justify-center items-center flex"
       style="background-color: #000; height: 110px"
     >
-      {{ status }}
+      {{ status === "" ? status : $t(status) }}
     </div>
   </q-page>
 </template>
@@ -54,14 +54,9 @@ export default defineComponent({
     },
   },
 
-  mounted() {
+  created() {
     appWindow.listen("status", this.onStatus);
-
-    appWindow.emit("init");
-
-    appWindow.emit("test", { message: "Tauri is awesome!" });
+    appWindow.emit("js_ready");
   },
-
-  onBeforeUnmount() {},
 });
 </script>

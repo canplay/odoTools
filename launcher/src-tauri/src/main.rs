@@ -7,7 +7,7 @@ use anyhow::Error;
 use chrono::Local;
 use ini::Ini;
 use std::{env, ffi::c_void, io, mem, thread, time::Duration};
-use tauri::{generate_context, Builder, Manager, RunEvent};
+use tauri::{generate_context, Builder, Manager, RunEvent, Window};
 use tracing::{info, instrument, Level};
 use tracing_appender::rolling;
 use tracing_subscriber::{
@@ -29,7 +29,7 @@ use windows::{
 
 #[derive(Clone, Debug)]
 struct ConfigService {
-    types: String,
+    typ: String,
     res: String,
 }
 
@@ -397,148 +397,180 @@ fn main() -> Result<(), Error> {
     info!("========== launcher start ==========");
 
     let app = Builder::default()
-        .setup(move |app| {
-            let main_window = app.get_window("main").unwrap();
+        .on_page_load(move |window, _| {
+            window.set_focus().unwrap();
 
-            main_window.listen("test", |event| {
-                println!("js call: {:?}", event.payload());
-            });
-
-            tauri::async_runtime::spawn(async move {
-                main_window
+            let path = path.clone();
+            let w = window.clone();
+            window.listen("js_ready", move |_| {
+                w.clone()
                     .emit(
                         "status",
                         Payload {
-                            message: "初始化...".into(),
+                            message: "init".into(),
                         },
                     )
                     .expect("failed to emit event");
-            });
 
-            let args: Vec<String> = env::args().collect();
+                // debug
+                // window.open_devtools();
 
-            // debug
-            path.pop();
-            path.pop();
-            // debug
+                // path.pop();
+                // path.pop();
+                // debug
 
-            // odolauncher://localhost:12347&1&1/
-            if args.len() > 1 && args[1].starts_with("odolauncher://") {
-                let v: Vec<&str> = args[1].split(&['/', '&'][..]).collect();
-                let address: Vec<&str> = v[2].split(&[':'][..]).collect();
+                let args: Vec<String> = env::args().collect();
 
-                let config = Ini::load_from_file(format!("{}/service.ini", &path.display()));
+                // odolauncher://localhost:12347&1&1/
+                if args.len() > 1 && args[1].starts_with("odolauncher://") {
+                    let v: Vec<&str> = args[1].split(&['/', '&'][..]).collect();
+                    let address: Vec<&str> = v[2].split(&[':'][..]).collect();
 
-                if config.is_ok() {
-                    let mut c = config.unwrap();
-                    let section_service = c.section(Some("SERVICE")).unwrap();
-                    let section_gt = c.section(Some("GT")).unwrap();
-                    let section_version = c.section(Some("VERSION")).unwrap();
+                    let config = Ini::load_from_file(format!("{}/service.ini", &path.display()));
 
-                    let _config_service = ConfigService {
-                        types: section_service.get("TYPE").unwrap().to_string(),
-                        res: section_service.get("RES").unwrap().to_string(),
-                    };
+                    if config.is_ok() {
+                        let mut c = config.unwrap();
+                        let section_service = c.section(Some("SERVICE")).unwrap();
+                        let section_gt = c.section(Some("GT")).unwrap();
+                        let section_version = c.section(Some("VERSION")).unwrap();
 
-                    let _config_gt = ConfigGt {
-                        authentic_domain: section_gt.get("AUTHENTIC_DOMAIN").unwrap().to_string(),
-                        authentic_port: section_gt.get("AUTHENTIC_PORT").unwrap().to_string(),
-                        patch_url: section_gt.get("PATCH_URL").unwrap().to_string(),
-                        view_trade_market_url: section_gt
-                            .get("viewTradeMarketUrl")
-                            .unwrap()
-                            .to_string(),
-                        game_trade_market_url: section_gt
-                            .get("gameTradeMarketUrl")
-                            .unwrap()
-                            .to_string(),
-                    };
+                        let _config_service = ConfigService {
+                            typ: section_service.get("TYPE").unwrap().to_string(),
+                            res: section_service.get("RES").unwrap().to_string(),
+                        };
 
-                    let _config_version = ConfigVersion {
-                        launcher: section_version.get("launcher").unwrap().to_string(),
-                        client: section_version.get("client").unwrap().to_string(),
-                        resource: section_version.get("resource").unwrap().to_string(),
-                    };
+                        let _config_gt = ConfigGt {
+                            authentic_domain: section_gt
+                                .get("AUTHENTIC_DOMAIN")
+                                .unwrap()
+                                .to_string(),
+                            authentic_port: section_gt.get("AUTHENTIC_PORT").unwrap().to_string(),
+                            patch_url: section_gt.get("PATCH_URL").unwrap().to_string(),
+                            view_trade_market_url: section_gt
+                                .get("viewTradeMarketUrl")
+                                .unwrap()
+                                .to_string(),
+                            game_trade_market_url: section_gt
+                                .get("gameTradeMarketUrl")
+                                .unwrap()
+                                .to_string(),
+                        };
 
-                    c.with_section(Some("GT"))
-                        .set("AUTHENTIC_DOMAIN", address[0])
-                        .set("AUTHENTIC_PORT", address[1]);
+                        let _config_version = ConfigVersion {
+                            launcher: section_version.get("launcher").unwrap().to_string(),
+                            client: section_version.get("client").unwrap().to_string(),
+                            resource: section_version.get("resource").unwrap().to_string(),
+                        };
 
-                    c.with_section(Some("VERSION"))
-                        .set("launcher", "1.0.0.0")
-                        .set("client", "1.0.0.0")
-                        .set("resource", "1.0.0.0");
+                        c.with_section(Some("GT"))
+                            .set("AUTHENTIC_DOMAIN", address[0])
+                            .set("AUTHENTIC_PORT", address[1]);
+
+                        c.with_section(Some("VERSION"))
+                            .set("launcher", "1.0.0.0")
+                            .set("client", "1.0.0.0")
+                            .set("resource", "1.0.0.0");
+                    } else {
+                        let mut c = Ini::new();
+                        c.with_section(Some("SERVICE"))
+                            .set("TYPE", "GT")
+                            .set("RES", "_EN_");
+
+                        c.with_section(Some("GT"))
+                            .set("AUTHENTIC_DOMAIN", address[0])
+                            .set("AUTHENTIC_PORT", address[1])
+                            .set(
+                                "PATCH_URL",
+                                "http://dn.global-lab.playblackdesert.com/UploadData/",
+                            )
+                            .set(
+                                "viewTradeMarketUrl",
+                                "https://trade.global-lab.playblackdesert.com/",
+                            )
+                            .set(
+                                "gameTradeMarketUrl",
+                                "https://game-trade.global-lab.playblackdesert.com/",
+                            );
+
+                        c.with_section(Some("VERSION"))
+                            .set("launcher", "1.0.0.0")
+                            .set("client", "1.0.0.0")
+                            .set("resource", "1.0.0.0");
+                        c.write_to_file(format!("{}/service.ini", &path.display()))
+                            .unwrap();
+                    }
+
+                    let r = run_game(
+                        &format!(
+                            "{}/bin64/BlackDesert64.exe",
+                            env::current_dir().unwrap().display()
+                        ),
+                        v[3],
+                        v[4],
+                    )
+                    .unwrap();
+
+                    if r {
+                        w.clone()
+                            .emit(
+                                "status",
+                                Payload {
+                                    message: "launch_success".into(),
+                                },
+                            )
+                            .expect("failed to emit event");
+
+                        info!("========== launch game client success! ==========");
+                    } else {
+                        w.clone()
+                            .emit(
+                                "status",
+                                Payload {
+                                    message: "launch_failed".into(),
+                                },
+                            )
+                            .expect("failed to emit event");
+
+                        info!("========== launch game client failed! ==========");
+                    }
                 } else {
-                    let mut c = Ini::new();
-                    c.with_section(Some("SERVICE"))
-                        .set("TYPE", "GT")
-                        .set("RES", "_EN_");
+                    let r = register_protocol().unwrap();
 
-                    c.with_section(Some("GT"))
-                        .set("AUTHENTIC_DOMAIN", address[0])
-                        .set("AUTHENTIC_PORT", address[1])
-                        .set(
-                            "PATCH_URL",
-                            "http://dn.global-lab.playblackdesert.com/UploadData/",
-                        )
-                        .set(
-                            "viewTradeMarketUrl",
-                            "https://trade.global-lab.playblackdesert.com/",
-                        )
-                        .set(
-                            "gameTradeMarketUrl",
-                            "https://game-trade.global-lab.playblackdesert.com/",
-                        );
+                    let config =
+                        Ini::load_from_file(format!("{}/service.ini", &path.display())).unwrap();
+                    let section_gt = config.section(Some("GT")).unwrap();
 
-                    c.with_section(Some("VERSION"))
-                        .set("launcher", "1.0.0.0")
-                        .set("client", "1.0.0.0")
-                        .set("resource", "1.0.0.0");
-                    c.write_to_file("service.ini").unwrap();
+                    webbrowser::open(&format!(
+                        "http://{}:12347",
+                        section_gt.get("AUTHENTIC_DOMAIN").unwrap().to_string()
+                    ))
+                    .unwrap();
+
+                    if r {
+                        w.clone()
+                            .emit(
+                                "status",
+                                Payload {
+                                    message: "protocol_success".into(),
+                                },
+                            )
+                            .expect("failed to emit event");
+
+                        info!("========== register url protocol success! ==========");
+                    } else {
+                        w.clone()
+                            .emit(
+                                "status",
+                                Payload {
+                                    message: "protocol_failed".into(),
+                                },
+                            )
+                            .expect("failed to emit event");
+
+                        info!("========== register url protocol failed! ==========");
+                    }
                 }
-
-                let r = run_game(
-                    &format!(
-                        "{}/bin64/BlackDesert64.exe",
-                        env::current_dir().unwrap().display()
-                    ),
-                    v[3],
-                    v[4],
-                )
-                .unwrap();
-
-                info!(
-                    "========== {}",
-                    if r {
-                        "launch game client success!"
-                    } else {
-                        "launch game client fail!"
-                    }
-                );
-            } else {
-                let r = register_protocol().unwrap();
-
-                let config =
-                    Ini::load_from_file(format!("{}/service.ini", &path.display())).unwrap();
-                let _section_gt = config.section(Some("GT")).unwrap();
-
-                // webbrowser::open(&format!(
-                //     "http://{}:12347",
-                //     section_gt.get("AUTHENTIC_DOMAIN").unwrap().to_string()
-                // ))
-                // .unwrap();
-
-                info!(
-                    "========== {}",
-                    if r {
-                        "register url protocol success!"
-                    } else {
-                        "register url protocol fail!"
-                    }
-                );
-            }
-
-            Ok(())
+            });
         })
         .build(generate_context!())
         .expect("error while building application");

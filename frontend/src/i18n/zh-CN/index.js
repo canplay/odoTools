@@ -13,6 +13,8 @@ export default {
   delete: "删除",
   save: "保存",
   add: "添加",
+  success: "成功",
+  failed: "失败",
   toolbar: {
     index: "首页",
     shop: "商城",

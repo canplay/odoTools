@@ -398,19 +398,17 @@ fn main() -> Result<(), Error> {
 
     let app = Builder::default()
         .on_page_load(move |window, _| {
-            window.set_focus().unwrap();
-
             let path = path.clone();
             let w = window.clone();
+
             window.listen("js_ready", move |_| {
-                w.clone()
-                    .emit(
-                        "status",
-                        Payload {
-                            message: "init".into(),
-                        },
-                    )
-                    .expect("failed to emit event");
+                w.emit(
+                    "status",
+                    Payload {
+                        message: "init".into(),
+                    },
+                )
+                .expect("failed to emit event");
 
                 // debug
                 // window.open_devtools();
@@ -511,25 +509,23 @@ fn main() -> Result<(), Error> {
                     .unwrap();
 
                     if r {
-                        w.clone()
-                            .emit(
-                                "status",
-                                Payload {
-                                    message: "launch_success".into(),
-                                },
-                            )
-                            .expect("failed to emit event");
+                        w.emit(
+                            "status",
+                            Payload {
+                                message: "launch_success".into(),
+                            },
+                        )
+                        .expect("failed to emit event");
 
                         info!("========== launch game client success! ==========");
                     } else {
-                        w.clone()
-                            .emit(
-                                "status",
-                                Payload {
-                                    message: "launch_failed".into(),
-                                },
-                            )
-                            .expect("failed to emit event");
+                        w.emit(
+                            "status",
+                            Payload {
+                                message: "launch_failed".into(),
+                            },
+                        )
+                        .expect("failed to emit event");
 
                         info!("========== launch game client failed! ==========");
                     }
@@ -547,29 +543,40 @@ fn main() -> Result<(), Error> {
                     .unwrap();
 
                     if r {
-                        w.clone()
-                            .emit(
-                                "status",
-                                Payload {
-                                    message: "protocol_success".into(),
-                                },
-                            )
-                            .expect("failed to emit event");
+                        w.emit(
+                            "status",
+                            Payload {
+                                message: "protocol_success".into(),
+                            },
+                        )
+                        .expect("failed to emit event");
 
                         info!("========== register url protocol success! ==========");
                     } else {
-                        w.clone()
-                            .emit(
-                                "status",
-                                Payload {
-                                    message: "protocol_failed".into(),
-                                },
-                            )
-                            .expect("failed to emit event");
+                        w.emit(
+                            "status",
+                            Payload {
+                                message: "protocol_failed".into(),
+                            },
+                        )
+                        .expect("failed to emit event");
 
                         info!("========== register url protocol failed! ==========");
                     }
                 }
+
+                let w = w.clone();
+                thread::spawn(move || {
+                    thread::sleep(std::time::Duration::from_secs(3));
+
+                    w.emit(
+                        "status",
+                        Payload {
+                            message: "done".into(),
+                        },
+                    )
+                    .expect("failed to emit event");
+                });
             });
         })
         .build(generate_context!())

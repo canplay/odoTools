@@ -19,7 +19,7 @@
         :title="$t('index.announcement') + $t('list')"
         :rows="announcements.rows"
         :columns="column_news"
-        row-key="title"
+        row-key="id"
         separator="cell"
         selection="multiple"
         v-model:selected="announcements.selected"
@@ -98,7 +98,7 @@
         :title="$t('index.event') + $t('list')"
         :rows="events.rows"
         :columns="column_news"
-        row-key="title"
+        row-key="id"
         separator="cell"
         selection="multiple"
         v-model:selected="events.selected"
@@ -177,7 +177,7 @@
         :title="$t('index.carousel') + $t('list')"
         :rows="carousel.rows"
         :columns="column_carousel"
-        row-key="img"
+        row-key="id"
         separator="cell"
         selection="multiple"
         v-model:selected="carousel.selected"
@@ -238,7 +238,7 @@
         :title="$t('toolbar.downloads') + $t('list')"
         :rows="downloads.rows"
         :columns="column_downloads"
-        row-key="title"
+        row-key="id"
         separator="cell"
         selection="multiple"
         v-model:selected="downloads.selected"
@@ -411,8 +411,11 @@ export default defineComponent({
 
           if (element.type === "announcements") {
             this.announcements.rows.push(element);
+            this.announcements.rows[this.announcements.rows.length - 1].id =
+              element._id.$oid;
           } else if (element.type === "events") {
             this.events.rows.push(element);
+            this.events.rows[this.events.rows.length - 1].id = element._id.$oid;
           }
         }
       });
@@ -423,6 +426,8 @@ export default defineComponent({
         for (let index = 0; index < resp.data.msg.length; index++) {
           const element = resp.data.msg[index];
           this.carousel.rows.push(element);
+          this.carousel.rows[this.carousel.rows.length - 1].id =
+            element._id.$oid;
         }
       })
       .catch((error) => {
@@ -436,6 +441,8 @@ export default defineComponent({
         for (let index = 0; index < resp.data.msg.length; index++) {
           const element = resp.data.msg[index];
           this.downloads.rows.push(element);
+          this.downloads.rows[this.downloads.rows.length - 1].id =
+            element._id.$oid;
         }
       })
       .catch(() => {
@@ -448,9 +455,7 @@ export default defineComponent({
       switch (val) {
         case "announcements":
           this.announcements.rows.push({
-            _id: {
-              $oid: "t" + this.announcements.rows.length,
-            },
+            id: "new-" + this.announcements.rows.length,
             title: "New Announcement",
             date: date.formatDate(Date.now(), "YYYY-MM-DD"),
             type: "announcements",
@@ -460,9 +465,7 @@ export default defineComponent({
           break;
         case "events":
           this.events.rows.push({
-            _id: {
-              $oid: "t" + this.events.rows.length,
-            },
+            id: "new-" + this.events.rows.length,
             title: "New Event",
             date: date.formatDate(Date.now(), "YYYY-MM-DD"),
             type: "events",
@@ -472,9 +475,7 @@ export default defineComponent({
           break;
         case "carousel":
           this.carousel.rows.push({
-            _id: {
-              $oid: "t" + this.carousel.rows.length,
-            },
+            id: "new-" + this.carousel.rows.length,
             img: "img/",
             url: "",
             delete: false,
@@ -482,9 +483,7 @@ export default defineComponent({
           break;
         case "downloads":
           this.downloads.rows.push({
-            _id: {
-              $oid: "t" + this.downloads.rows.length,
-            },
+            id: "new-" + this.downloads.rows.length,
             title: "New Download",
             desc: "",
             url: "",
@@ -496,6 +495,7 @@ export default defineComponent({
 
     onSave(val) {
       let selected;
+      let data;
 
       switch (val) {
         case "announcements":
@@ -513,12 +513,11 @@ export default defineComponent({
       }
 
       selected.forEach((element) => {
-        let data;
         switch (val) {
           case "announcements":
             data = {
               method: "news",
-              id: element._id.$oid,
+              id: element.id,
               title: element.title,
               date: element.date,
               type: "announcements",
@@ -529,7 +528,7 @@ export default defineComponent({
           case "events":
             data = {
               method: "news",
-              id: element._id.$oid,
+              id: element.id,
               title: element.title,
               date: element.date,
               type: "events",
@@ -539,8 +538,8 @@ export default defineComponent({
             break;
           case "carousel":
             data = {
-              method: "events",
-              id: element._id.$oid,
+              method: "carousel",
+              id: element.id,
               img: element.img,
               url: element.url,
               delete: false,
@@ -549,13 +548,17 @@ export default defineComponent({
           case "downloads":
             data = {
               method: "downloads",
-              id: element._id.$oid,
+              id: element.id,
               title: element.title,
               desc: element.desc,
               url: element.url,
               delete: false,
             };
             break;
+        }
+
+        if (data.id.search("new-") === 0) {
+          data.id = "";
         }
 
         this.$axios
@@ -565,7 +568,7 @@ export default defineComponent({
             },
           })
           .then((resp) => {
-            if (resp.data.status === 1) {
+            if (resp.data.msg === true) {
               this.$q.notify(this.$t("success"));
             } else {
               this.$q.notify(this.$t("failed"));
@@ -580,6 +583,9 @@ export default defineComponent({
 
     onDelete(val) {
       let selected;
+      let el;
+      let index;
+      let data;
 
       switch (val) {
         case "announcements":
@@ -596,16 +602,12 @@ export default defineComponent({
           break;
       }
 
-      console.log(data.id.indexOf("t"));
-      return;
-
       selected.forEach((element) => {
-        let data;
         switch (val) {
           case "announcements":
             data = {
               method: "news",
-              id: element._id.$oid,
+              id: element.id,
               title: element.title,
               date: element.date,
               type: "announcements",
@@ -613,61 +615,93 @@ export default defineComponent({
               delete: true,
             };
 
-            if (data.id.indexOf("t") === 1) {
-              let el = this.announcements.rows.filter((e) => {
-                return e.id === element.id;
-              });
+            el = this.announcements.rows.filter((e) => {
+              return e.id === data.id;
+            });
 
-              let index = this.announcements.rows.indexOf(el[0]);
+            index = this.announcements.rows.indexOf(el[0]);
 
-              index > -1 && this.announcements.rows.splice(index, 1);
-            }
+            index > -1 && this.announcements.rows.splice(index, 1);
+
+            this.announcements.selected = [];
             break;
           case "events":
             data = {
-              method: "events",
-              id: element._id.$oid,
+              method: "news",
+              id: element.id,
               title: element.title,
               date: element.date,
               type: "events",
               content: element.content,
               delete: true,
             };
+
+            el = this.events.rows.filter((e) => {
+              return e.id === data.id;
+            });
+
+            index = this.events.rows.indexOf(el[0]);
+
+            index > -1 && this.events.rows.splice(index, 1);
+
+            this.events.selected = [];
             break;
           case "carousel":
             data = {
-              method: "events",
-              id: element._id.$oid,
+              method: "carousel",
+              id: element.id,
               img: element.img,
               url: element.url,
-              delete: true,
+              delete: false,
             };
+
+            el = this.carousel.rows.filter((e) => {
+              return e.id === data.id;
+            });
+
+            index = this.carousel.rows.indexOf(el[0]);
+
+            index > -1 && this.carousel.rows.splice(index, 1);
+
+            this.carousel.selected = [];
             break;
           case "downloads":
             data = {
               method: "downloads",
-              id: element._id.$oid,
+              id: element.id,
               title: element.title,
               desc: element.desc,
               url: element.url,
-              delete: true,
+              delete: false,
             };
+
+            el = this.downloads.rows.filter((e) => {
+              return e.id === data.id;
+            });
+
+            index = this.downloads.rows.indexOf(el[0]);
+
+            index > -1 && this.downloads.rows.splice(index, 1);
+
+            this.downloads.selected = [];
             break;
         }
 
-        this.$axios
-          .post(this.$store.state.global.backend + "/api/website", data, {
-            headers: {
-              authorization: "Bearer " + this.$q.cookies.get("canplay-token"),
-            },
-          })
-          .then((resp) => {
-            console.log(resp);
-          })
-          .catch((e) => {
-            console.log(e);
-            this.$q.notify(this.$t("error.network"));
-          });
+        if (data.id.search("new-") === -1) {
+          this.$axios
+            .post(this.$store.state.global.backend + "/api/website", data, {
+              headers: {
+                authorization: "Bearer " + this.$q.cookies.get("canplay-token"),
+              },
+            })
+            .then((resp) => {
+              console.log(resp);
+            })
+            .catch((e) => {
+              console.log(e);
+              this.$q.notify(this.$t("error.network"));
+            });
+        }
       });
     },
   },

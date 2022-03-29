@@ -62,10 +62,10 @@ pub struct ConfigInfo {
 pub async fn set_news(news: NewsInfo, db: &Database) -> Result<bool, Error> {
     let typed_collection = db.collection::<NewsInfo>("news");
     let cursor = typed_collection
-        .find(doc! { "_id": news.id, "delete": false }, None)
-        .await;
+        .find_one(doc! { "_id": news.id, "delete": false }, None)
+        .await?;
 
-    if cursor.is_err() {
+    if cursor.is_none() {
         let typed_collection = db.collection::<NewsInfo>("news");
         let result = typed_collection.insert_one(news, None).await?;
 
@@ -133,10 +133,10 @@ pub async fn get_news(id: &str, db: &Database) -> Result<Vec<NewsInfo>, Error> {
 pub async fn set_carousel(carousel: CarouselInfo, db: &Database) -> Result<bool, Error> {
     let typed_collection = db.collection::<CarouselInfo>("carousel");
     let cursor = typed_collection
-        .find(doc! { "_id": carousel.id, "delete": false }, None)
-        .await;
+        .find_one(doc! { "_id": carousel.id, "delete": false }, None)
+        .await?;
 
-    if cursor.is_err() {
+    if cursor.is_none() {
         let typed_collection = db.collection::<CarouselInfo>("carousel");
         let result = typed_collection.insert_one(carousel, None).await?;
 
@@ -202,10 +202,10 @@ pub async fn get_carousel(id: &str, db: &Database) -> Result<Vec<CarouselInfo>, 
 pub async fn set_downloads(downloads: DownloadsInfo, db: &Database) -> Result<bool, Error> {
     let typed_collection = db.collection::<DownloadsInfo>("downloads");
     let cursor = typed_collection
-        .find(doc! { "_id": downloads.id, "delete": false }, None)
-        .await;
+        .find_one(doc! { "_id": downloads.id, "delete": false }, None)
+        .await?;
 
-    if cursor.is_err() {
+    if cursor.is_none() {
         let typed_collection = db.collection::<DownloadsInfo>("downloads");
         let result = typed_collection.insert_one(downloads, None).await?;
 
@@ -272,10 +272,10 @@ pub async fn get_downloads(id: &str, db: &Database) -> Result<Vec<DownloadsInfo>
 pub async fn set_shop(shop: ShopInfo, db: &Database) -> Result<bool, Error> {
     let typed_collection = db.collection::<ShopInfo>("shop");
     let cursor = typed_collection
-        .find(doc! { "_id": shop.id, "delete": false }, None)
-        .await;
+        .find_one(doc! { "_id": shop.id, "delete": false }, None)
+        .await?;
 
-    if cursor.is_err() {
+    if cursor.is_none() {
         let typed_collection = db.collection::<ShopInfo>("shop");
         let result = typed_collection.insert_one(shop, None).await?;
 
@@ -344,10 +344,10 @@ pub async fn get_shop(id: &str, db: &Database) -> Result<Vec<ShopInfo>, Error> {
 pub async fn set_config(config: ConfigInfo, db: &Database) -> Result<bool, Error> {
     let typed_collection = db.collection::<ConfigInfo>("config");
     let cursor = typed_collection
-        .find(doc! { "_id": config.id, "delete": false }, None)
-        .await;
+        .find_one(doc! { "_id": config.id, "delete": false }, None)
+        .await?;
 
-    if cursor.is_err() {
+    if cursor.is_none() {
         let typed_collection = db.collection::<ConfigInfo>("config");
         let result = typed_collection.insert_one(config, None).await?;
 

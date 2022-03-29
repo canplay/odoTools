@@ -8,7 +8,7 @@
       <q-card-section style="background-color: rgba(0, 0, 0, 0.8)">
         <q-card dark>
           <q-card-section class="row" v-for="item in list" :key="item">
-            <div class="col text-h4">{{ item.name }}</div>
+            <div class="col text-h4">{{ item.title }}</div>
 
             <div class="col text-h6">{{ item.desc }}</div>
 

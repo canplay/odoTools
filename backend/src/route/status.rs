@@ -1,9 +1,13 @@
 use crate::Conf;
 use actix_web::{get, web, Error, HttpResponse};
 use actix_web_grants::proc_macro::has_permissions;
+use fastping_rs::{
+    PingResult::{Idle, Receive},
+    Pinger,
+};
 use ini::Ini;
 use serde_json::json;
-use std::{fs::File, io::Read, mem, net::TcpListener, path::Path};
+use std::{fs::File, io::Read, mem, path::Path};
 use windows::Win32::{Foundation, System::Diagnostics::ToolHelp};
 
 fn check_process(exe: &str) -> bool {
@@ -37,14 +41,26 @@ fn check_process(exe: &str) -> bool {
 }
 
 fn check_port(port: i64) -> bool {
-    let addr = format!("127.0.0.1:{}", port);
-    let listener = TcpListener::bind(addr);
+    let mut ret = false;
+    let (pinger, results) = Pinger::new(None, Some(56)).unwrap();
+    pinger.add_ipaddr(&format!("127.0.0.1:{}", port));
+    pinger.run_pinger();
 
-    if listener.is_err() {
-        return true;
+    for _i in [0..3] {
+        match results.recv() {
+            Ok(result) => match result {
+                Idle { addr: _ } => {
+                    ret = false;
+                }
+                Receive { addr: _, rtt: _ } => {
+                    ret = true;
+                }
+            },
+            Err(_) => ret = false,
+        }
     }
 
-    return false;
+    return ret;
 }
 
 #[get("/info/server")]

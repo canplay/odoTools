@@ -165,6 +165,7 @@ async fn main() -> Result<(), Error> {
             .service(route::website::downloads)
             .service(route::website::shop)
             .service(route::website::config)
+            .service(route::patch::api)
             .service(
                 web::scope("/api")
                     .wrap(HttpAuthentication::bearer(validator))

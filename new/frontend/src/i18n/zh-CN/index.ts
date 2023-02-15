@@ -2,6 +2,6 @@
 // so you can safely delete all default props below
 
 export default {
-  index: 'Index',
+  index: '官网首页',
   success: 'Action was successful',
 };

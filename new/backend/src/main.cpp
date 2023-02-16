@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "httplib.h"
 #include "utility.h"
+#include "mssql.h"
 
 using namespace drogon;
 
@@ -53,7 +54,16 @@ int main()
 
 	app().loadConfigFile("./config.json");
 
+	auto mssqlConfig = app().getCustomConfig()["mssql"];
+	if (!api::MsSql::connect(mssqlConfig["host"].asString(), mssqlConfig["user"].asString(), mssqlConfig["passwd"].asString()))
+	{
+		spdlog::error("========== connect mssql error ==========");
+		return 0;
+	}
+
 	app().run();
+
+	api::MsSql::close();
 
 	spdlog::shutdown();
 	spdlog::info("========== stop server ==========");

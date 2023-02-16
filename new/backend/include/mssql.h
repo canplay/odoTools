@@ -1,13 +1,15 @@
 #pragma once
 
+#include <nanodbc/nanodbc.h>
+
 namespace api
 {
 	class MsSql
 	{
 	public:
-		bool init(std::string datasource, std::string username, std::string password);
+		static bool connect(std::string datasource, std::string username, std::string password);
+		static void close();
 
-	private:
-		nanodbc::connection odbc;
+		static nanodbc::result exec(std::string stmt);
 	};
 }

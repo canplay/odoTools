@@ -73,6 +73,13 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { useQuasar } from 'quasar';
+import { useStore } from 'src/stores/store';
+import useFetch from 'src/components/fetch';
+import * as jose from 'jose';
+
+const $q = useQuasar();
+const store = useStore();
 
 const { locale } = useI18n({ useScope: 'global' });
 const localeOptions = [
@@ -85,4 +92,35 @@ const tab = ref('index');
 const onGoto = (val: string) => {
   document.getElementById(val)?.scrollIntoView();
 };
+
+if ($q.cookies.has('canplay_token') && $q.cookies.get('canplay_token') != '') {
+  const id = jose.decodeJwt($q.cookies.get('canplay_token')).id;
+
+  useFetch()
+    .post(
+      store.backend + '/api/user/info/' + id,
+      {},
+      $q.cookies.get('canplay_token')
+    )
+    .then((resp) => {
+      if (resp.data.status === 0) {
+        $q.notify(resp.data.msg);
+        return;
+      }
+
+      let username = resp.data.msg.username.split(',');
+
+      store.user = {
+        signin: true,
+        username: username[0],
+        password: username[1],
+        familyname: resp.data.msg.userNickname,
+        totalPlayTime: resp.data.msg.totalPlayTime,
+        membershipType: resp.data.msg.membershipType,
+      };
+    })
+    .catch(() => {
+      $q.notify('网络错误，请稍后重试');
+    });
+}
 </script>

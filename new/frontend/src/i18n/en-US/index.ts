@@ -15,9 +15,16 @@ export default {
   shop: {
     title: 'Shop',
     hot: 'Hot',
-    hot_desc: 'Shop',
+    hotDesc: 'Shop',
   },
-  system: 'System Requirements',
+  system: {
+    title: 'System Requirements',
+    cpu: 'CPU',
+    disk: 'Disk Space',
+    ram: 'Memory',
+    graphics: 'Graphics Card',
+    os: 'OS',
+  },
   nvidia: 'NVIDIA Driver',
   amd: 'AMD Driver',
   client: 'Download Latest Client',

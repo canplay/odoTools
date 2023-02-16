@@ -307,9 +307,9 @@
 	//custom_config: custom configuration for users. This object can be get by the app().getCustomConfig() method.
 	"custom_config": {
 		"mssql": {
-			"host": "192.168.20.253",
+			"host": "bdo",
 			"user": "CrimsonDesert",
-			"pwd": "BlackNo.1Game#^%"
+			"passwd": "BlackNo.1Game#^%"
 		},
 		"jwt": {
 			"private_key": "canplay_jwt_private_key",

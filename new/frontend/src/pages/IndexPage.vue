@@ -53,8 +53,8 @@
 
       <q-card dark>
         <q-card-section>
-          <q-form @submit="onSubmit" @reset="onReset" class="row">
-            <div class="col">
+          <q-form @submit="onSignup" @reset="onSignin" class="row">
+            <div class="col" v-if="!store.user.signin">
               <q-input
                 dark
                 filled
@@ -81,6 +81,20 @@
               />
             </div>
 
+            <div class="col" v-else>
+              <div class="text-h4">用户名：{{ store.user.username }}</div>
+
+              <div class="text-h4">家族名：{{ store.user.familyname }}</div>
+
+              <div class="text-h4">
+                会员等级：{{ store.user.membershipType }}
+              </div>
+
+              <div class="text-h4">
+                游玩时间：{{ store.user.totalPlayTime }}
+              </div>
+            </div>
+
             <div class="col-auto" style="width: 8px" />
 
             <div class="col row" v-if="!store.user.signin">
@@ -91,7 +105,7 @@
                 size="48px"
                 type="submit"
               >
-                <div class="absolute-center">{{ $t('signin') }}</div>
+                <div class="absolute-center">{{ $t('signup') }}</div>
                 <div
                   class="fit relative-position"
                   style="
@@ -114,7 +128,7 @@
                 size="48px"
                 type="reset"
               >
-                <div class="absolute-center">{{ $t('signup') }}</div>
+                <div class="absolute-center">{{ $t('signin') }}</div>
                 <div
                   class="fit relative-position"
                   style="
@@ -206,7 +220,7 @@
         >
           <template v-slot:top>
             <div class="fit text-center text-h5 text-bold">
-              {{ $t('system') }}
+              {{ $t('system.title') }}
             </div>
           </template>
 
@@ -223,7 +237,7 @@
                 :props="props"
                 style="font: bold 18px arial, sans-serif"
               >
-                {{ props.row.class }}
+                {{ $t(props.row.class) }}
               </q-td>
 
               <q-td key="min" :props="props">
@@ -418,9 +432,11 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import { QTableProps } from 'quasar';
+import { useQuasar, QTableProps } from 'quasar';
 import { useStore } from 'src/stores/store';
+import useFetch from 'components/fetch';
 
+const $q = useQuasar();
 const store = useStore();
 
 const slide = ref({
@@ -468,35 +484,35 @@ const columns = [
 
 const rows = ref([
   {
-    class: '处理器',
+    class: 'system.cpu',
     min: 'Intel Core i3',
     rec: 'Intel Core i5',
     rem: 'Intel Core i7-8700',
     max: 'Intel Core i7-8700K',
   },
   {
-    class: '存储空间',
+    class: 'system.disk',
     min: '~41GB',
     rec: '~41GB',
     rem: '~41GB',
     max: '~41GB',
   },
   {
-    class: '内存',
+    class: 'system.ram',
     min: '4GB',
     rec: '8GB',
     rem: '16GB',
     max: '32GB',
   },
   {
-    class: '显卡',
+    class: 'system.graphics',
     min: 'NVIDIA GTS 250、AMD HD 3870 X2',
     rec: 'NVIDIA GTX 970、AMD RX 480',
     rem: 'NVIDIA GTX 1070 8GB',
     max: 'NVIDIA GTX 1080ti 11GB',
   },
   {
-    class: '操作系统',
+    class: 'system.os',
     min: 'Windows 10 64位',
     rec: 'Windows 10 64位',
     rem: 'Windows 10 64位',
@@ -580,12 +596,88 @@ for (let index = 0; index < 5; index++) {
   });
 }
 
-const onSubmit = () => {
-  return;
+const onSignin = () => {
+  let time = setTimeout(() => {
+    $q.loading.hide();
+    clearTimeout(time);
+  }, 180000);
+
+  $q.loading.show();
+
+  useFetch()
+    .post(store.backend + '/api/user/signin', {
+      username: username.value,
+      password: password.value,
+    })
+    .then((resp) => {
+      if (resp.data.status === 0) {
+        $q.loading.hide();
+        clearTimeout(time);
+        $q.notify(resp.data.msg);
+        return;
+      }
+
+      $q.cookies.set('canplay_token', resp.data.msg.token);
+
+      store.user = {
+        signin: true,
+        username: username.value,
+        password: password.value,
+        familyname: resp.data.msg.userNickname,
+        totalPlayTime: resp.data.msg.totalPlayTime,
+        membershipType: resp.data.msg.membershipType,
+      };
+
+      $q.loading.hide();
+      clearTimeout(time);
+    })
+    .catch(() => {
+      $q.loading.hide();
+      clearTimeout(time);
+      $q.notify('网络错误，请稍后重试');
+    });
 };
 
-const onReset = () => {
-  return;
+const onSignup = () => {
+  let time = setTimeout(() => {
+    $q.loading.hide();
+    clearTimeout(time);
+  }, 180000);
+
+  $q.loading.show();
+
+  useFetch()
+    .post(store.backend + '/api/user/signup', {
+      username: username.value,
+      password: password.value,
+    })
+    .then((resp) => {
+      if (resp.data.status === 0) {
+        $q.loading.hide();
+        clearTimeout(time);
+        $q.notify(resp.data.msg);
+        return;
+      }
+
+      $q.cookies.set('canplay_token', resp.data.msg.token);
+
+      store.user = {
+        signin: true,
+        username: username.value,
+        password: password.value,
+        familyname: resp.data.msg.userNickname,
+        totalPlayTime: resp.data.msg.totalPlayTime,
+        membershipType: resp.data.msg.membershipType,
+      };
+
+      $q.loading.hide();
+      clearTimeout(time);
+    })
+    .catch(() => {
+      $q.loading.hide();
+      clearTimeout(time);
+      $q.notify('网络错误，请稍后重试');
+    });
 };
 
 const onNews = (val: any) => {

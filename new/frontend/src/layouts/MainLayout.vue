@@ -9,7 +9,7 @@
     "
   >
     <q-header elevated>
-      <q-toolbar class="bg-grey-10 text-white row">
+      <q-toolbar class="bg-grey-10 text-white row q-electron-drag">
         <q-img class="col-auto" src="imgs/logo.png" width="240px" />
 
         <div class="col-auto" style="width: 30px" />
@@ -57,10 +57,14 @@
     </q-header>
 
     <q-footer elevated>
-      <q-toolbar class="bg-grey-10 text-center">
-        <q-toolbar-title style="font-size: medium">
+      <q-toolbar class="bg-grey-10 text-center row">
+        <div class="col">正在检查更新...</div>
+
+        <q-toolbar-title class="col-8" style="font-size: medium">
           Powered by CaNplay
         </q-toolbar-title>
+
+        <q-btn class="col" color="accent" label="退出" @click="onClose" />
       </q-toolbar>
     </q-footer>
 
@@ -69,6 +73,13 @@
     </q-page-container>
   </q-layout>
 </template>
+
+<style>
+* {
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+</style>
 
 <script setup lang="ts">
 import { ref } from 'vue';
@@ -82,6 +93,7 @@ const $q = useQuasar();
 const store = useStore();
 
 const { locale } = useI18n({ useScope: 'global' });
+locale.value = navigator.language;
 const localeOptions = [
   { value: 'en-US', label: 'English' },
   { value: 'zh-CN', label: '简体中文' },
@@ -93,13 +105,16 @@ const onGoto = (val: string) => {
   document.getElementById(val)?.scrollIntoView();
 };
 
+const onClose = () => {
+  window.close();
+};
+
 if ($q.cookies.has('canplay_token') && $q.cookies.get('canplay_token') != '') {
   const id = jose.decodeJwt($q.cookies.get('canplay_token')).id;
 
   useFetch()
-    .post(
+    .get(
       store.backend + '/api/user/info/' + id,
-      {},
       $q.cookies.get('canplay_token')
     )
     .then((resp) => {
@@ -108,7 +123,7 @@ if ($q.cookies.has('canplay_token') && $q.cookies.get('canplay_token') != '') {
         return;
       }
 
-      let username = resp.data.msg.username.split(',');
+      let username = resp.data.msg.userId.split(',');
 
       store.user = {
         signin: true,

@@ -13,7 +13,7 @@ namespace api
 			METHOD_ADD(User::signup, "/signup", Options, Post, "api::LogFilter");
 		METHOD_ADD(User::signin, "/signin", Options, Post, "api::LogFilter");
 		METHOD_ADD(User::signout, "/signout", Options, Post, "api::JwtFilter");
-		METHOD_ADD(User::info, "/info/{id}", Get, "api::JwtFilter");
+		METHOD_ADD(User::info, "/info/{id}", Options, Get, "api::JwtFilter");
 		METHOD_ADD(User::update, "/update", Options, Post, "api::JwtFilter");
 		METHOD_LIST_END
 

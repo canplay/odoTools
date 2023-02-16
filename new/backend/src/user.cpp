@@ -33,11 +33,11 @@ namespace api
 			auto r = MsSql::exec(stmt);
 			r.next();
 
-			if (r.rows() > 1)
+			if (r.rows() != 0)
 			{
-				ret["msg"] = "username is exist";
-				ret["status"] = 1;
-				callback(HttpResponse::newHttpJsonResponse(ret));
+				ret["msg"] = "username already exist";
+				ret["status"] = 0;
+				return callback(HttpResponse::newHttpJsonResponse(ret));
 			}
 			else
 			{
@@ -124,36 +124,45 @@ namespace api
 
 			auto r = MsSql::exec(stmt);
 			r.next();
-			info["registerDate"] = r.get<std::string>(0);
-			info["isValid"] = r.get<std::string>(1);
-			info["userNo"] = r.get<int>(2);
-			info["userId"] = r.get<std::string>(3);
-			info["userNickname"] = r.get<std::string>(4);
-			info["lastLoginTime"] = r.get<std::string>(10);
-			info["lastLogoutTime"] = r.get<std::string>(11);
-			info["totalPlayTime"] = r.get<int>(12);
-			info["lastServerNo"] = r.get<int>(14);
-			info["lastWorldNo"] = r.get<int>(15);
-			info["serviceType"] = r.get<int>(16);
-			info["failPasswordCount"] = r.get<int>(17);
-			info["membershipType"] = r.get<int>(19);
 
-			jwt jwtGenerated = jwt::generateToken(
-				{
-					{"id", picojson::value(info["userNo"].asString())},
-				},
-				(*json).isMember("remember") && (*json)["remember"].asBool());
-			std::int64_t jwtExpiration = jwtGenerated.getExpiration();
-			info["token"] = jwtGenerated.getToken();
-			info["expiresIn"] =
-				jwtExpiration -
-				std::chrono::duration_cast<std::chrono::seconds>(
-					std::chrono::system_clock::now().time_since_epoch())
-				.count();
-			info["expiresAt"] = jwtExpiration;
+			if (r.rows() != 0)
+			{
+				info["registerDate"] = r.get<std::string>(0);
+				info["isValid"] = r.get<std::string>(1);
+				info["userNo"] = r.get<int>(2);
+				info["userId"] = r.get<std::string>(3);
+				info["userNickname"] = r.get<std::string>(4);
+				info["lastLoginTime"] = r.get<std::string>(10);
+				info["lastLogoutTime"] = r.get<std::string>(11);
+				info["totalPlayTime"] = r.get<int>(12);
+				info["lastServerNo"] = r.get<int>(14);
+				info["lastWorldNo"] = r.get<int>(15);
+				info["serviceType"] = r.get<int>(16);
+				info["failPasswordCount"] = r.get<int>(17);
+				info["membershipType"] = r.get<int>(19);
 
-			ret["msg"] = info;
-			ret["status"] = 1;
+				jwt jwtGenerated = jwt::generateToken(
+					{
+						{"id", picojson::value(info["userNo"].asString())},
+					},
+					(*json).isMember("remember") && (*json)["remember"].asBool());
+				std::int64_t jwtExpiration = jwtGenerated.getExpiration();
+				info["token"] = jwtGenerated.getToken();
+				info["expiresIn"] =
+					jwtExpiration -
+					std::chrono::duration_cast<std::chrono::seconds>(
+						std::chrono::system_clock::now().time_since_epoch())
+					.count();
+				info["expiresAt"] = jwtExpiration;
+
+				ret["msg"] = info;
+				ret["status"] = 1;
+			}
+			else
+			{
+				ret["msg"] = "username or password error";
+				ret["status"] = 0;
+			}
 		}
 		catch (const std::exception& e)
 		{

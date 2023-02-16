@@ -27,9 +27,6 @@
     <ClCompile Include="common\src\jwt.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="src\order.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="common\src\blowfish.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
@@ -37,15 +34,6 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="common\src\node_blf.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="src\statistics.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="src\staff.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="src\storage.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="src\user.cpp">
@@ -77,19 +65,7 @@
     <ClInclude Include="common\include\utility.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="include\order.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="common\include\uuid.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="include\statistics.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="include\staff.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="include\storage.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="common\include\httplib.h">

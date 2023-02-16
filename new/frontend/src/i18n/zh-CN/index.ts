@@ -19,6 +19,11 @@ export default {
   },
   system: {
     title: '配置要求',
+    class: '类别',
+    min: '最小要求',
+    rec: '推荐配置',
+    rem: '重置版配置',
+    max: '最佳配置',
     cpu: '处理器',
     disk: '存储空间',
     ram: '内存',

@@ -226,7 +226,7 @@
 
           <template v-slot:header-cell="props">
             <q-th :props="props" style="font: bold 18px arial, sans-serif">
-              {{ props.col.label }}
+              {{ $t(props.col.label) }}
             </q-th>
           </template>
 
@@ -263,7 +263,13 @@
       <div style="height: 8px" />
 
       <div class="row">
-        <q-btn dark flat class="col text-white text-bold" size="24px">
+        <q-btn
+          dark
+          flat
+          class="col text-white text-bold"
+          size="24px"
+          to="https://www.nvidia.com/Download/index.aspx"
+        >
           <div class="absolute-center">{{ $t('nvidia') }}</div>
           <div
             class="fit relative-position"
@@ -280,7 +286,13 @@
 
         <div style="width: 8px" />
 
-        <q-btn dark flat class="col text-white text-bold" size="24px">
+        <q-btn
+          dark
+          flat
+          class="col text-white text-bold"
+          size="24px"
+          to="https://www.amd.com/en/support"
+        >
           <div class="absolute-center">{{ $t('amd') }}</div>
           <div
             class="fit relative-position"
@@ -435,6 +447,7 @@ import { ref } from 'vue';
 import { useQuasar, QTableProps } from 'quasar';
 import { useStore } from 'src/stores/store';
 import useFetch from 'components/fetch';
+import electron from 'electron';
 
 const $q = useQuasar();
 const store = useStore();
@@ -451,32 +464,32 @@ const accept = ref(false);
 const columns = [
   {
     name: 'class',
-    label: '类别',
+    label: 'system.class',
     field: 'class',
     align: 'center',
     classes: 'text-bold',
   },
   {
     name: 'min',
-    label: '最小要求',
+    label: 'system.min',
     field: 'min',
     align: 'center',
   },
   {
     name: 'rec',
-    label: '推荐配置',
+    label: 'system.rec',
     field: 'rec',
     align: 'center',
   },
   {
     name: 'rem',
-    label: '重置版配置',
+    label: 'system.rem',
     field: 'rem',
     align: 'center',
   },
   {
     name: 'max',
-    label: '最佳配置',
+    label: 'system.max',
     field: 'max',
     align: 'center',
   },
@@ -513,10 +526,10 @@ const rows = ref([
   },
   {
     class: 'system.os',
-    min: 'Windows 10 64位',
-    rec: 'Windows 10 64位',
-    rem: 'Windows 10 64位',
-    max: 'Windows 10 64位',
+    min: 'Windows 10 x64',
+    rec: 'Windows 10 x64',
+    rem: 'Windows 10 x64',
+    max: 'Windows 10 x64',
   },
 ] as any);
 
@@ -597,87 +610,108 @@ for (let index = 0; index < 5; index++) {
 }
 
 const onSignin = () => {
-  let time = setTimeout(() => {
-    $q.loading.hide();
-    clearTimeout(time);
-  }, 180000);
+  if (store.user.signin) {
+    electron.ipcRenderer.send('launcher', username.value, password.value);
+  } else {
+    if (!accept.value) {
+      $q.notify('需要同意用户协议才能注册');
+      return;
+    }
 
-  $q.loading.show();
+    let time = setTimeout(() => {
+      $q.loading.hide();
+      clearTimeout(time);
+    }, 180000);
 
-  useFetch()
-    .post(store.backend + '/api/user/signin', {
-      username: username.value,
-      password: password.value,
-    })
-    .then((resp) => {
-      if (resp.data.status === 0) {
-        $q.loading.hide();
-        clearTimeout(time);
-        $q.notify(resp.data.msg);
-        return;
-      }
+    $q.loading.show();
 
-      $q.cookies.set('canplay_token', resp.data.msg.token);
-
-      store.user = {
-        signin: true,
+    useFetch()
+      .post(store.backend + '/api/user/signin', {
         username: username.value,
         password: password.value,
-        familyname: resp.data.msg.userNickname,
-        totalPlayTime: resp.data.msg.totalPlayTime,
-        membershipType: resp.data.msg.membershipType,
-      };
+      })
+      .then((resp) => {
+        if (resp.data.status === 0) {
+          $q.loading.hide();
+          clearTimeout(time);
+          $q.notify(resp.data.msg);
+          return;
+        }
 
-      $q.loading.hide();
-      clearTimeout(time);
-    })
-    .catch(() => {
-      $q.loading.hide();
-      clearTimeout(time);
-      $q.notify('网络错误，请稍后重试');
-    });
+        $q.cookies.set('canplay_token', resp.data.msg.token);
+
+        store.user = {
+          signin: true,
+          username: username.value,
+          password: password.value,
+          familyname: resp.data.msg.userNickname,
+          totalPlayTime: resp.data.msg.totalPlayTime,
+          membershipType: resp.data.msg.membershipType,
+        };
+
+        $q.loading.hide();
+        clearTimeout(time);
+      })
+      .catch(() => {
+        $q.loading.hide();
+        clearTimeout(time);
+        $q.notify('网络错误，请稍后重试');
+      });
+  }
 };
 
 const onSignup = () => {
-  let time = setTimeout(() => {
-    $q.loading.hide();
-    clearTimeout(time);
-  }, 180000);
+  if (store.user.signin) {
+    $q.cookies.remove('canplay_token');
+    store.user = {
+      signin: false,
+      username: '',
+      password: '',
+      familyname: '',
+      totalPlayTime: 0,
+      membershipType: 0,
+    };
+  } else {
+    let time = setTimeout(() => {
+      $q.loading.hide();
+      clearTimeout(time);
+    }, 180000);
 
-  $q.loading.show();
+    $q.loading.show();
 
-  useFetch()
-    .post(store.backend + '/api/user/signup', {
-      username: username.value,
-      password: password.value,
-    })
-    .then((resp) => {
-      if (resp.data.status === 0) {
-        $q.loading.hide();
-        clearTimeout(time);
-        $q.notify(resp.data.msg);
-        return;
-      }
-
-      $q.cookies.set('canplay_token', resp.data.msg.token);
-
-      store.user = {
-        signin: true,
+    useFetch()
+      .post(store.backend + '/api/user/signup', {
         username: username.value,
         password: password.value,
-        familyname: resp.data.msg.userNickname,
-        totalPlayTime: resp.data.msg.totalPlayTime,
-        membershipType: resp.data.msg.membershipType,
-      };
+      })
+      .then((resp) => {
+        if (resp.data.status === 0) {
+          $q.loading.hide();
+          clearTimeout(time);
+          $q.notify(resp.data.msg);
+          return;
+        }
 
-      $q.loading.hide();
-      clearTimeout(time);
-    })
-    .catch(() => {
-      $q.loading.hide();
-      clearTimeout(time);
-      $q.notify('网络错误，请稍后重试');
-    });
+        $q.cookies.set('canplay_token', resp.data.msg.token);
+
+        store.user = {
+          signin: true,
+          username: username.value,
+          password: password.value,
+          familyname: resp.data.msg.userNickname,
+          totalPlayTime: resp.data.msg.totalPlayTime,
+          membershipType: resp.data.msg.membershipType,
+        };
+
+        $q.loading.hide();
+        clearTimeout(time);
+      })
+      .catch(() => {
+        $q.loading.hide();
+        clearTimeout(time);
+        $q.notify('网络错误，请稍后重试');
+      });
+  }
 };
 
 const onNews = (val: any) => {

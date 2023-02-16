@@ -184,12 +184,17 @@ module.exports = configure(function (/* ctx */) {
       packager: {
         // https://github.com/electron-userland/electron-packager/blob/master/docs/api.md#options
         // OS X / Mac App Store
-        // appBundleId: '',
+        appBundleId: 'org.com.canplay.bdo',
+        arch: 'x64',
+        asar: false,
         // appCategoryType: '',
         // osxSign: '',
         // protocol: 'myapp://path',
         // Windows only
-        // win32metadata: { ... }
+        win32metadata: {
+          CompanyName: 'Powered By CaNplay',
+          OriginalFilename: 'frontend.exe',
+        },
       },
 
       builder: {

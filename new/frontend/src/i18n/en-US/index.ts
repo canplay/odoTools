@@ -19,6 +19,11 @@ export default {
   },
   system: {
     title: 'System Requirements',
+    class: 'Category',
+    min: 'Minimum',
+    rec: 'Recommended',
+    rem: 'Remastered',
+    max: 'Ultra Mode',
     cpu: 'CPU',
     disk: 'Disk Space',
     ram: 'Memory',

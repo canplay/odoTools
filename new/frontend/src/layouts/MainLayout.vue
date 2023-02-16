@@ -20,16 +20,24 @@
             :label="$t('index')"
             @click="onGoto('index')"
           />
-          <q-route-tab name="news" label="新闻公告" @click="onGoto('news')" />
-          <q-route-tab name="shop" label="珍珠商城" @click="onGoto('shop')" />
+          <q-route-tab
+            name="news"
+            :label="$t('news')"
+            @click="onGoto('news')"
+          />
+          <q-route-tab
+            name="shop"
+            :label="$t('shop.title')"
+            @click="onGoto('shop.title')"
+          />
           <q-route-tab
             name="downloads"
-            label="下载游戏"
+            :label="$t('downloads')"
             @click="onGoto('downloads')"
           />
           <q-route-tab
             name="social"
-            label="支持社区"
+            :label="$t('social')"
             @click="onGoto('social')"
           />
         </q-tabs>
@@ -42,6 +50,7 @@
           v-model="locale"
           :options="localeOptions"
           label="Global"
+          map-options
           emit-value
         />
       </q-toolbar>
@@ -66,7 +75,6 @@ import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 const { locale } = useI18n({ useScope: 'global' });
-console.log(locale);
 const localeOptions = [
   { value: 'en-US', label: 'English' },
   { value: 'zh-CN', label: '简体中文' },

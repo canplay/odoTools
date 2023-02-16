@@ -170,6 +170,7 @@ echo f | xcopy /y "$(VcpkgRoot)\installed\x64-windows\tools\crashpad_handler.exe
     <ClCompile Include="common\src\utility.cpp" />
     <ClCompile Include="src\order.cpp" />
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\mssql.cpp" />
     <ClCompile Include="src\staff.cpp" />
     <ClCompile Include="src\statistics.cpp" />
     <ClCompile Include="src\stdafx.cpp">
@@ -177,6 +178,7 @@ echo f | xcopy /y "$(VcpkgRoot)\installed\x64-windows\tools\crashpad_handler.exe
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="src\storage.cpp" />
+    <ClCompile Include="src\user.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="common\include\filter.h" />
@@ -186,12 +188,14 @@ echo f | xcopy /y "$(VcpkgRoot)\installed\x64-windows\tools\crashpad_handler.exe
     <ClInclude Include="common\include\openbsd.h" />
     <ClInclude Include="common\include\utility.h" />
     <ClInclude Include="common\include\uuid.h" />
+    <ClInclude Include="include\mssql.h" />
     <ClInclude Include="include\staff.h" />
     <ClInclude Include="include\statistics.h" />
     <ClInclude Include="include\stdafx.h" />
     <ClInclude Include="include\resource.h" />
     <ClInclude Include="include\order.h" />
     <ClInclude Include="include\storage.h" />
+    <ClInclude Include="include\user.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="config.json" />

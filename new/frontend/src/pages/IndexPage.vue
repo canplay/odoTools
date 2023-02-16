@@ -59,7 +59,7 @@
                 dark
                 filled
                 v-model="username"
-                label="用户名"
+                :label="$t('username')"
                 lazy-rules
                 :rules="[(val) => (val && val.length > 0) || '不能为空']"
               />
@@ -68,7 +68,7 @@
                 dark
                 filled
                 v-model="password"
-                label="密码"
+                :label="$t('password')"
                 lazy-rules
                 :rules="[(val) => (val && val.length > 0) || '不能为空']"
               />
@@ -77,13 +77,13 @@
                 dark
                 v-model="accept"
                 class="text-white"
-                label="同意 用户协议"
+                :label="$t('accept')"
               />
             </div>
 
             <div class="col-auto" style="width: 8px" />
 
-            <div class="col row">
+            <div class="col row" v-if="!store.user.signin">
               <q-btn
                 dark
                 flat
@@ -91,7 +91,7 @@
                 size="48px"
                 type="submit"
               >
-                <div class="absolute-center">注册</div>
+                <div class="absolute-center">{{ $t('signin') }}</div>
                 <div
                   class="fit relative-position"
                   style="
@@ -114,7 +114,53 @@
                 size="48px"
                 type="reset"
               >
-                <div class="absolute-center">登录</div>
+                <div class="absolute-center">{{ $t('signup') }}</div>
+                <div
+                  class="fit relative-position"
+                  style="
+                    background-image: url(imgs/slide/5.jpg);
+                    background-position: right bottom, left top;
+                    background-repeat: no-repeat, no-repeat;
+                    background-size: 100% 100%;
+                    z-index: -1;
+                    filter: blur(3px);
+                  "
+                />
+              </q-btn>
+            </div>
+
+            <div class="col row" v-else>
+              <q-btn
+                dark
+                flat
+                class="col text-positive text-bold"
+                size="48px"
+                type="submit"
+              >
+                <div class="absolute-center">{{ $t('signout') }}</div>
+                <div
+                  class="fit relative-position"
+                  style="
+                    background-image: url(imgs/slide/4.jpg);
+                    background-position: right bottom, left top;
+                    background-repeat: no-repeat, no-repeat;
+                    background-size: 100% 100%;
+                    z-index: -1;
+                    filter: blur(3px);
+                  "
+                />
+              </q-btn>
+
+              <div class="col-auto" style="width: 8px" />
+
+              <q-btn
+                dark
+                flat
+                class="col text-white text-bold"
+                size="48px"
+                type="reset"
+              >
+                <div class="absolute-center">{{ $t('launcher') }}</div>
                 <div
                   class="fit relative-position"
                   style="
@@ -142,8 +188,8 @@
         @click="onShop"
       >
         <div class="absolute-bottom custom-caption">
-          <div class="text-h2">热门商品</div>
-          <div class="text-subtitle1">珍珠商城</div>
+          <div class="text-h2">{{ $t('shop.hot') }}</div>
+          <div class="text-subtitle1">{{ $t('shop.hotDesc') }}</div>
         </div>
       </q-img>
 
@@ -159,7 +205,9 @@
           hide-bottom
         >
           <template v-slot:top>
-            <div class="fit text-center text-h5 text-bold">配置要求</div>
+            <div class="fit text-center text-h5 text-bold">
+              {{ $t('system') }}
+            </div>
           </template>
 
           <template v-slot:header-cell="props">
@@ -202,7 +250,7 @@
 
       <div class="row">
         <q-btn dark flat class="col text-white text-bold" size="24px">
-          <div class="absolute-center">NVIDIA显卡驱动</div>
+          <div class="absolute-center">{{ $t('nvidia') }}</div>
           <div
             class="fit relative-position"
             style="
@@ -219,7 +267,7 @@
         <div style="width: 8px" />
 
         <q-btn dark flat class="col text-white text-bold" size="24px">
-          <div class="absolute-center">AMD显卡驱动</div>
+          <div class="absolute-center">{{ $t('amd') }}</div>
           <div
             class="fit relative-position"
             style="
@@ -238,7 +286,7 @@
 
       <div class="row" id="downloads">
         <q-btn dark flat class="col text-white text-bold" size="48px">
-          <div class="absolute-center">下载最新客户端</div>
+          <div class="absolute-center">{{ $t('client') }}</div>
           <div
             class="fit relative-position"
             style="
@@ -257,7 +305,7 @@
 
       <q-card dark class="text-h6 text-center" id="social">
         <q-card-section>
-          支持社区
+          {{ $t('social') }}
           <div class="row">
             <q-btn dark flat class="col" icon="img:imgs/weibo.svg" />
             <q-btn dark flat class="col" icon="img:imgs/qq.svg" />
@@ -299,13 +347,12 @@
           v-model:selected="dialog.shop.selected"
           :filter="dialog.shop.filter"
           v-model:pagination="dialog.shop.pagination"
-          rows-per-page-label="每页记录条数"
           grid
           hide-header
         >
           <template v-slot:top>
             <div class="row fit">
-              <div class="col text-h4 text-bold">珍珠商城</div>
+              <div class="col text-h4 text-bold">{{ $t('shop.title') }}</div>
 
               <q-input
                 class="col-auto"
@@ -314,7 +361,7 @@
                 dense
                 debounce="300"
                 v-model="dialog.shop.filter"
-                placeholder="查找"
+                :placeholder="$t('search')"
               >
                 <template v-slot:append>
                   <q-icon name="search" />
@@ -372,6 +419,9 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { QTableProps } from 'quasar';
+import { useStore } from 'src/stores/store';
+
+const store = useStore();
 
 const slide = ref({
   model: '1',

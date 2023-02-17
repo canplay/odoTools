@@ -27,3 +27,6 @@
  *   }
  * }
  */
+
+import { IpcRenderer } from 'electron';
+window.ipcRenderer = IpcRenderer;

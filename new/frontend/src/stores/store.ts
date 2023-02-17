@@ -2,7 +2,7 @@ import { defineStore } from 'pinia';
 
 export const useStore = defineStore('global', {
   state: () => ({
-    backend: 'http://bdo.cltserver.xyz:51530',
+    backend: '/backend',
     // backend: 'http://localhost:51530',
     user: {
       signin: false,
@@ -11,6 +11,11 @@ export const useStore = defineStore('global', {
       familyname: '',
       totalPlayTime: 0,
       membershipType: 0,
+    },
+    update: {
+      remote: {} as any,
+      progress: 100,
+      status: '已是最新',
     },
   }),
 });

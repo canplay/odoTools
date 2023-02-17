@@ -67,11 +67,20 @@
               <q-input
                 dark
                 filled
+                :type="isPwd ? 'password' : 'text'"
                 v-model="password"
                 :label="$t('password')"
                 lazy-rules
                 :rules="[(val) => (val && val.length > 0) || '不能为空']"
-              />
+              >
+                <template v-slot:append>
+                  <q-icon
+                    :name="isPwd ? 'visibility_off' : 'visibility'"
+                    class="cursor-pointer"
+                    @click="isPwd = !isPwd"
+                  />
+                </template>
+              </q-input>
 
               <q-toggle
                 dark
@@ -173,8 +182,31 @@
                 class="col text-white text-bold"
                 size="48px"
                 type="reset"
+                v-if="$q.platform.is.electron"
               >
-                <div class="absolute-center">{{ $t('launcher') }}</div>
+                <div class="absolute-center">{{ $t('launcher.title') }}</div>
+                <div
+                  class="fit relative-position"
+                  style="
+                    background-image: url(imgs/slide/5.jpg);
+                    background-position: right bottom, left top;
+                    background-repeat: no-repeat, no-repeat;
+                    background-size: 100% 100%;
+                    z-index: -1;
+                    filter: blur(3px);
+                  "
+                />
+              </q-btn>
+
+              <q-btn
+                dark
+                flat
+                class="col text-white text-bold"
+                size="48px"
+                type="reset"
+                v-else
+              >
+                <div class="absolute-center">{{ $t('launcher.download') }}</div>
                 <div
                   class="fit relative-position"
                   style="
@@ -268,7 +300,7 @@
           flat
           class="col text-white text-bold"
           size="24px"
-          to="https://www.nvidia.com/Download/index.aspx"
+          @click="window.location.href = 'https://www.nvidia.com/Download/index.aspx'"
         >
           <div class="absolute-center">{{ $t('nvidia') }}</div>
           <div
@@ -291,7 +323,7 @@
           flat
           class="col text-white text-bold"
           size="24px"
-          to="https://www.amd.com/en/support"
+          @click="window.location.href = 'https://www.amd.com/en/support'"
         >
           <div class="absolute-center">{{ $t('amd') }}</div>
           <div
@@ -447,7 +479,6 @@ import { ref } from 'vue';
 import { useQuasar, QTableProps } from 'quasar';
 import { useStore } from 'src/stores/store';
 import useFetch from 'components/fetch';
-import electron from 'electron';
 
 const $q = useQuasar();
 const store = useStore();
@@ -459,6 +490,7 @@ const slide = ref({
 const news = ref([] as any);
 const username = ref('');
 const password = ref('');
+const isPwd = ref(true);
 const accept = ref(false);
 
 const columns = [
@@ -611,7 +643,11 @@ for (let index = 0; index < 5; index++) {
 
 const onSignin = () => {
   if (store.user.signin) {
-    electron.ipcRenderer.send('launcher', username.value, password.value);
+    if ($q.platform.is.electron) {
+      window.ipcRenderer.send('launcher', username.value, password.value);
+    } else {
+      window.location.href = store.backend + '/downloads/launcher.exe';
+    }
   } else {
     if (!accept.value) {
       $q.notify('需要同意用户协议才能注册');

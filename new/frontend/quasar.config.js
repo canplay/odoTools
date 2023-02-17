@@ -91,6 +91,13 @@ module.exports = configure(function (/* ctx */) {
     devServer: {
       // https: true
       open: true, // opens browser window automatically
+      proxy: {
+        '/backend': {
+          target: 'http://cltgames.ddns.me:51530',
+          changeOrigin: true,
+          rewrite: (path) => path.replace(/^\/backend/, ''),
+        },
+      },
     },
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#framework
@@ -186,7 +193,8 @@ module.exports = configure(function (/* ctx */) {
         // OS X / Mac App Store
         appBundleId: 'org.com.canplay.bdo',
         arch: 'x64',
-        asar: false,
+        asar: true,
+        appCopyright: 'Powered by CaNplay',
         // appCategoryType: '',
         // osxSign: '',
         // protocol: 'myapp://path',

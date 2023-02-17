@@ -34,5 +34,8 @@ export default {
   amd: 'AMD显卡驱动',
   client: '下载最新客户端',
   search: '查找',
-  launcher: '开始',
+  launcher: {
+    title: '开始',
+    download: '下载登录器',
+  },
 };

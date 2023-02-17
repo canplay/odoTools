@@ -34,5 +34,8 @@ export default {
   amd: 'AMD Driver',
   client: 'Download Latest Client',
   search: 'Search',
-  launcher: 'Start',
+  launcher: {
+    title: 'Start',
+    download: 'Download Launcher',
+  },
 };

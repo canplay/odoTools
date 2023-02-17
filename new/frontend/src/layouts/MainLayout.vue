@@ -58,13 +58,33 @@
 
     <q-footer elevated>
       <q-toolbar class="bg-grey-10 text-center row">
-        <div class="col">正在检查更新...</div>
+        <q-linear-progress
+          dark
+          rounded
+          class="col electron-only"
+          :value="store.update.progress"
+          size="32px"
+          color="accent"
+        >
+          <div class="absolute-full flex flex-center">
+            <q-badge
+              color="white"
+              text-color="accent"
+              :label="store.update.status"
+            />
+          </div>
+        </q-linear-progress>
 
         <q-toolbar-title class="col-8" style="font-size: medium">
           Powered by CaNplay
         </q-toolbar-title>
 
-        <q-btn class="col" color="accent" label="退出" @click="onClose" />
+        <q-btn
+          class="col electron-only"
+          color="accent"
+          label="退出"
+          @click="onClose"
+        />
       </q-toolbar>
     </q-footer>
 

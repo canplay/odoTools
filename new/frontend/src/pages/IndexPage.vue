@@ -82,12 +82,9 @@
                 </template>
               </q-input>
 
-              <q-toggle
-                dark
-                v-model="accept"
-                class="text-white"
-                :label="$t('accept')"
-              />
+              <q-toggle dark v-model="accept">
+                <a href="" class="text-white">{{ $t('accept') }}</a>
+              </q-toggle>
             </div>
 
             <div class="col" v-else>
@@ -241,56 +238,54 @@
 
       <div style="height: 8px" />
 
-      <q-scroll-area class="rounded-borders" style="width: 100%; height: 300px">
-        <q-table
-          dark
-          separator="cell"
-          :columns="columns"
-          :rows="rows"
-          row-key="class"
-          hide-bottom
-        >
-          <template v-slot:top>
-            <div class="fit text-center text-h5 text-bold">
-              {{ $t('system.title') }}
-            </div>
-          </template>
+      <q-table
+        dark
+        separator="cell"
+        :columns="columns"
+        :rows="rows"
+        row-key="class"
+        hide-bottom
+      >
+        <template v-slot:top>
+          <div class="fit text-center text-h5 text-bold">
+            {{ $t('system.title') }}
+          </div>
+        </template>
 
-          <template v-slot:header-cell="props">
-            <q-th :props="props" style="font: bold 18px arial, sans-serif">
-              {{ $t(props.col.label) }}
-            </q-th>
-          </template>
+        <template v-slot:header-cell="props">
+          <q-th :props="props" style="font: bold 18px arial, sans-serif">
+            {{ $t(props.col.label) }}
+          </q-th>
+        </template>
 
-          <template v-slot:body="props">
-            <q-tr :props="props">
-              <q-td
-                key="class"
-                :props="props"
-                style="font: bold 18px arial, sans-serif"
-              >
-                {{ $t(props.row.class) }}
-              </q-td>
+        <template v-slot:body="props">
+          <q-tr :props="props">
+            <q-td
+              key="class"
+              :props="props"
+              style="font: bold 18px arial, sans-serif"
+            >
+              {{ $t(props.row.class) }}
+            </q-td>
 
-              <q-td key="min" :props="props">
-                {{ props.row.min }}
-              </q-td>
+            <q-td key="min" :props="props">
+              {{ props.row.min }}
+            </q-td>
 
-              <q-td key="rec" :props="props">
-                {{ props.row.rec }}
-              </q-td>
+            <q-td key="rec" :props="props">
+              {{ props.row.rec }}
+            </q-td>
 
-              <q-td key="rem" :props="props">
-                {{ props.row.rem }}
-              </q-td>
+            <q-td key="rem" :props="props">
+              {{ props.row.rem }}
+            </q-td>
 
-              <q-td key="max" :props="props">
-                {{ props.row.max }}
-              </q-td>
-            </q-tr>
-          </template>
-        </q-table>
-      </q-scroll-area>
+            <q-td key="max" :props="props">
+              {{ props.row.max }}
+            </q-td>
+          </q-tr>
+        </template>
+      </q-table>
 
       <div style="height: 8px" />
 
@@ -300,7 +295,7 @@
           flat
           class="col text-white text-bold"
           size="24px"
-          @click="window.location.href = 'https://www.nvidia.com/Download/index.aspx'"
+          @click="urlopen('https://www.nvidia.com/Download/index.aspx')"
         >
           <div class="absolute-center">{{ $t('nvidia') }}</div>
           <div
@@ -323,7 +318,7 @@
           flat
           class="col text-white text-bold"
           size="24px"
-          @click="window.location.href = 'https://www.amd.com/en/support'"
+          @click="urlopen('https://www.amd.com/en/support')"
         >
           <div class="absolute-center">{{ $t('amd') }}</div>
           <div
@@ -378,7 +373,7 @@
   </q-page>
 
   <q-dialog v-model="dialog.news.show">
-    <q-card dark style="width: 80vw; height: 80vh">
+    <q-card dark style="width: 90vw; height: 80vh">
       <q-card-section>
         <div class="text-h4 text-bold">{{ dialog.news.title }}</div>
 
@@ -394,7 +389,7 @@
   </q-dialog>
 
   <q-dialog v-model="dialog.shop.show">
-    <q-card dark style="width: 80vw; height: 80vh">
+    <q-card dark style="width: 90%; height: 80vh">
       <q-card-section>
         <q-table
           dark
@@ -476,9 +471,11 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import { useQuasar, QTableProps } from 'quasar';
+import { useQuasar, QTableProps, openURL } from 'quasar';
 import { useStore } from 'src/stores/store';
 import useFetch from 'components/fetch';
+import { compareVersions } from 'compare-versions';
+import version from '../../public/version.json';
 
 const $q = useQuasar();
 const store = useStore();
@@ -644,16 +641,11 @@ for (let index = 0; index < 5; index++) {
 const onSignin = () => {
   if (store.user.signin) {
     if ($q.platform.is.electron) {
-      window.ipcRenderer.send('launcher', username.value, password.value);
+      window.electron.launcher(store.user.username, store.user.password);
     } else {
       window.location.href = store.backend + '/downloads/launcher.exe';
     }
   } else {
-    if (!accept.value) {
-      $q.notify('需要同意用户协议才能注册');
-      return;
-    }
-
     let time = setTimeout(() => {
       $q.loading.hide();
       clearTimeout(time);
@@ -708,6 +700,11 @@ const onSignup = () => {
       membershipType: 0,
     };
   } else {
+    if (!accept.value) {
+      $q.notify('需要同意用户协议才能注册');
+      return;
+    }
+
     let time = setTimeout(() => {
       $q.loading.hide();
       clearTimeout(time);
@@ -762,4 +759,43 @@ const onNews = (val: any) => {
 const onShop = (val: any) => {
   dialog.value.shop.show = true;
 };
+
+const urlopen = (val: string) => {
+  if ($q.platform.is.electron) {
+    window.electron.openurl(val);
+  } else {
+    openURL(val);
+  }
+};
+
+useFetch()
+  .get(store.backend + '/downloads/version.json')
+  .then((resp) => {
+    store.update.remote = resp.data;
+
+    if (
+      compareVersions(
+        store.update.remote.launcher.version,
+        version.launcher.version
+      )
+    ) {
+      store.update.status = '检查到登录器新版本';
+    }
+
+    if (compareVersions(store.update.remote.app.version, version.app.version)) {
+      store.update.status = '检查到客户端新版本';
+    }
+
+    if (
+      compareVersions(
+        store.update.remote.resource.version,
+        version.resource.version
+      )
+    ) {
+      store.update.status = '检查到客户端资源新版本';
+    }
+  })
+  .catch(() => {
+    store.update.status = '检查更新失败';
+  });
 </script>

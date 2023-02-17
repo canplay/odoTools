@@ -1,0 +1,17 @@
+{
+  "launcher": {
+    "version": "2023.02.016",
+    "desc": "登录器更新测试",
+    "force": false
+  },
+  "app": {
+    "version": "2023.02.016",
+    "desc": "客户端二进制文件更新测试",
+    "force": false
+  },
+  "resource": {
+    "version": "2023.02.016",
+    "desc": "客户端资源文件更新测试",
+    "force": false
+  }
+}

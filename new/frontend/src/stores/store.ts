@@ -2,8 +2,9 @@ import { defineStore } from 'pinia';
 
 export const useStore = defineStore('global', {
   state: () => ({
-    backend: '/backend',
+    // backend: '/backend',
     // backend: 'http://localhost:51530',
+    backend: 'http://cltgames.ddns.me:51530',
     user: {
       signin: false,
       username: '',

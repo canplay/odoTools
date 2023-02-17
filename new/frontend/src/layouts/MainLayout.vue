@@ -28,7 +28,7 @@
           <q-route-tab
             name="shop"
             :label="$t('shop.title')"
-            @click="onGoto('shop.title')"
+            @click="onGoto('shop')"
           />
           <q-route-tab
             name="downloads"
@@ -75,7 +75,15 @@
           </div>
         </q-linear-progress>
 
-        <q-toolbar-title class="col-8" style="font-size: medium">
+        <q-toolbar-title
+          v-if="$q.platform.is.electron"
+          class="col-8 electron-only"
+          style="font-size: medium"
+        >
+          Powered by CaNplay
+        </q-toolbar-title>
+
+        <q-toolbar-title v-else class="col" style="font-size: medium">
           Powered by CaNplay
         </q-toolbar-title>
 

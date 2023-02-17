@@ -1,4 +1,4 @@
-import { app, BrowserWindow, nativeTheme, ipcMain } from 'electron';
+import { app, BrowserWindow, nativeTheme, ipcMain, shell } from 'electron';
 import path from 'path';
 import os from 'os';
 import cp from 'child_process';
@@ -37,8 +37,8 @@ function createWindow() {
     icon: path.resolve(__dirname, 'icons/icon.png'), // tray icon
     width: 1024,
     height: 768,
-    frame: false,
     center: true,
+    frame: false,
     transparent: true,
     show: false,
     useContentSize: true,
@@ -76,7 +76,7 @@ function createWindow() {
   });
 
   mainWindow.webContents.session.on('will-download', (event, item) => {
-    mainWindow.webContents.send('download', item.getURL(), item.getFilename());
+    mainWindow!.webContents.send('download', item.getURL(), item.getFilename());
 
     event.preventDefault();
   });
@@ -87,16 +87,16 @@ function createWindow() {
 
     const p = cp
       .exec('aria2c.exe --conf-path=config.conf', {
-        cwd: app.getAppPath() + '/aria2',
+        cwd: app.getAppPath() + '/3rdparty',
         windowsHide: true,
       })
       .on('exit', () => {
         p.kill();
       });
 
-    mainWindow.show();
-    mainWindow.center();
-    mainWindow.focus();
+    mainWindow!.show();
+    mainWindow!.center();
+    mainWindow!.focus();
   });
 }
 
@@ -114,9 +114,13 @@ app.on('activate', () => {
   }
 });
 
-ipcMain.on('launcher', (ev, arg1, arg2) => {
+ipcMain.handle('electron:openurl', (ev, arg) => {
+  shell.openExternal(arg);
+});
+
+ipcMain.handle('electron:launcher', (ev, arg1, arg2) => {
   const p = cp
-    .exec('BlackDesert64.exe ' + arg1 + arg2, {
+    .exec('BlackDesert64.exe ' + arg1 + ',' + arg2, {
       cwd: app.getAppPath() + '/bin64',
     })
     .on('exit', () => {
@@ -124,15 +128,15 @@ ipcMain.on('launcher', (ev, arg1, arg2) => {
     });
 });
 
-const addDir = async (path) => {
+const addDir = async (path: string) => {
   if (fileStream.existsSync(path)) return;
   await fileStream.mkdirSync(path);
 };
 
-const delDir = async (path) => {
+const delDir = async (path: string) => {
   if (!fileStream.existsSync(path)) return;
 
-  await FileListLoop(path, (file) => {
+  await FileListLoop(path, (file: any) => {
     if (!fileStream.statSync(file).isDirectory()) {
       fileStream.unlinkSync(file);
     } else {
@@ -141,7 +145,7 @@ const delDir = async (path) => {
   });
 };
 
-const FileListLoop = async (path, callback) => {
+const FileListLoop = async (path: string, callback: any) => {
   if (!fileStream.existsSync(path)) {
     return;
   }

@@ -80,6 +80,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="config.json" />
+    <None Include="version.json" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="backend.rc">

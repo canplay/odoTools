@@ -28,5 +28,10 @@
  * }
  */
 
-import { IpcRenderer } from 'electron';
-window.ipcRenderer = IpcRenderer;
+import { contextBridge, ipcRenderer } from 'electron';
+
+contextBridge.exposeInMainWorld('electron', {
+  launcher: (arg1: string, arg2: string) =>
+    ipcRenderer.invoke('electron:launcher', arg1, arg2),
+  openurl: (arg: string) => ipcRenderer.invoke('electron:openurl', arg),
+});

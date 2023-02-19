@@ -191,7 +191,11 @@ namespace api
 		std::mt19937 generator(seq);
 		uuids::uuid_random_generator gen{ generator };
 		auto str = uuids::to_string(gen());
-		str.replace(str.begin(), str.end(), "-", "");
+		std::string::size_type pos = 0;
+		while ((pos = str.find("-")) != std::string::npos)
+		{
+			str.replace(pos, 1, "");
+		}
 		return str;
 	}
 

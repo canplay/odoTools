@@ -15,11 +15,7 @@
         <div class="col-auto" style="width: 30px" />
 
         <q-tabs class="col" v-model="tab">
-          <q-route-tab
-            name="index"
-            :label="$t('index')"
-            @click="onGoto('index')"
-          />
+          <q-route-tab name="index" :label="$t('index')" to="/" />
           <q-route-tab
             name="news"
             :label="$t('news')"
@@ -92,10 +88,6 @@ const tab = ref('index');
 
 const onGoto = (val: string) => {
   document.getElementById(val)?.scrollIntoView();
-};
-
-const onClose = () => {
-  window.close();
 };
 
 if ($q.cookies.has('canplay_token') && $q.cookies.get('canplay_token') != '') {

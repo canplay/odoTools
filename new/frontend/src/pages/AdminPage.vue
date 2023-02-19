@@ -11,6 +11,7 @@
               <q-tab name="index" icon="home" label="概览" />
               <q-tab name="web" icon="analytics" label="前端管理" />
               <q-tab name="user" icon="groups" label="用户管理" />
+              <q-tab name="shop" icon="store" label="商城管理" />
               <q-tab name="system" icon="settings" label="系统设置" />
             </q-tabs>
           </q-scroll-area>
@@ -118,7 +119,7 @@
                       <q-btn
                         color="primary"
                         :label="props.value"
-                        @click="onView(props.row)"
+                        @click="onView('news', props.row)"
                       />
                     </q-td>
 
@@ -177,7 +178,7 @@
                       <q-btn
                         color="primary"
                         :label="props.value"
-                        @click="onView(props.row)"
+                        @click="onView('slide', props.row)"
                       />
                     </q-td>
 
@@ -236,7 +237,7 @@
                       <q-btn
                         color="primary"
                         :label="props.value"
-                        @click="onView(props.row)"
+                        @click="onView('link', props.row)"
                       />
                     </q-td>
 
@@ -304,7 +305,7 @@
                       <q-btn
                         color="primary"
                         :label="props.value"
-                        @click="onView(props.row)"
+                        @click="onView('user', props.row)"
                       />
                     </q-td>
 
@@ -374,6 +375,137 @@
       </q-splitter>
     </q-card>
   </q-page>
+
+  <q-dialog v-model="dialog.news.show">
+    <q-card style="min-width: 80vw">
+      <q-card-section class="text-h6">编辑新闻</q-card-section>
+
+      <q-card-section>
+        <div class="row">
+          <q-input class="col" v-model="dialog.news.title" label="标题" />
+
+          <div class="col-auto" style="width: 8px" />
+
+          <q-input class="col" v-model="dialog.news.date" label="日期">
+            <template v-slot:prepend>
+              <q-icon name="event" class="cursor-pointer">
+                <q-popup-proxy transition-show="scale" transition-hide="scale">
+                  <q-date v-model="dialog.news.date" mask="YYYY-MM-DD HH:mm:ss">
+                    <div class="row items-center justify-end">
+                      <q-btn v-close-popup label="关闭" color="primary" flat />
+                    </div>
+                  </q-date>
+                </q-popup-proxy>
+              </q-icon>
+            </template>
+
+            <template v-slot:append>
+              <q-icon name="access_time" class="cursor-pointer">
+                <q-popup-proxy transition-show="scale" transition-hide="scale">
+                  <q-time
+                    v-model="dialog.news.date"
+                    mask="YYYY-MM-DD HH:mm:ss"
+                    format24h
+                  >
+                    <div class="row items-center justify-end">
+                      <q-btn v-close-popup label="关闭" color="primary" flat />
+                    </div>
+                  </q-time>
+                </q-popup-proxy>
+              </q-icon>
+            </template>
+          </q-input>
+
+          <div class="col-auto" style="width: 8px" />
+
+          <q-input v-model="dialog.news.author" label="作者" />
+        </div>
+
+        <div style="height: 8px" />
+
+        <q-input
+          class="fit"
+          v-model="dialog.news.content"
+          type="textarea"
+          filled
+          input-style="height: 60vh"
+        />
+      </q-card-section>
+
+      <q-card-actions class="row">
+        <q-btn
+          class="col"
+          label="删除"
+          color="negative"
+          @click="onDel('news')"
+        />
+        <q-btn
+          class="col"
+          label="保存"
+          color="primary"
+          @click="onSave('news')"
+        />
+      </q-card-actions>
+    </q-card>
+  </q-dialog>
+
+  <q-dialog v-model="dialog.slide.show">
+    <q-card style="min-width: 80vw">
+      <q-card-section class="text-h6">编辑滚动图</q-card-section>
+
+      <q-card-section>
+        <div class="row">
+          <q-input class="col" v-model="dialog.slide.title" label="标题" />
+
+          <div class="col-auto" style="width: 8px" />
+
+          <q-input class="col" v-model="dialog.slide.desc" label="简介" />
+
+          <div class="col-auto" style="width: 8px" />
+
+          <q-input class="col" v-model="dialog.slide.link" label="链接" />
+        </div>
+
+        <div class="col-auto" style="height: 8px" />
+
+        <q-input v-model="dialog.slide.img" label="图片链接" />
+      </q-card-section>
+
+      <q-card-actions class="row">
+        <q-btn
+          class="col"
+          label="保存"
+          color="primary"
+          @click="onSave('slide')"
+        />
+      </q-card-actions>
+    </q-card>
+  </q-dialog>
+
+  <q-dialog v-model="dialog.link.show">
+    <q-card style="min-width: 80vw">
+      <q-card-section class="text-h6">编辑滚动图</q-card-section>
+
+      <q-card-section>
+        <div class="row">
+          <q-input class="col" v-model="dialog.link.title" label="标题" />
+
+          <div class="col-auto" style="width: 8px" />
+
+          <q-input class="col" v-model="dialog.link.link" label="链接" />
+        </div>
+      </q-card-section>
+
+      <q-card-actions class="row">
+        <q-btn
+          class="col"
+          label="保存"
+          color="primary"
+          @click="onSave('link')"
+        />
+      </q-card-actions>
+    </q-card>
+  </q-dialog>
 </template>
 
 <script setup lang="ts">
@@ -381,6 +513,7 @@ import { ref } from 'vue';
 import { date, useQuasar, QTableProps } from 'quasar';
 import { useStore } from 'stores/store';
 import useFetch from 'src/components/fetch';
+import { Base64 } from 'js-base64';
 
 const $q = useQuasar();
 const store = useStore();
@@ -441,6 +574,13 @@ const table = ref({
         name: 'content',
         label: '内容',
         field: 'content',
+        align: 'center',
+        sortable: true,
+      },
+      {
+        name: 'delete',
+        label: '是否删除',
+        field: 'delete',
         align: 'center',
         sortable: true,
       },
@@ -696,6 +836,31 @@ const table = ref({
   },
 });
 
+const dialog = ref({
+  news: {
+    show: false,
+    id: '',
+    title: '',
+    author: '',
+    date: '',
+    content: '',
+  },
+  slide: {
+    show: false,
+    id: '',
+    title: '',
+    desc: '',
+    link: '',
+    img: '',
+  },
+  link: {
+    show: false,
+    id: '',
+    title: '',
+    link: '',
+  },
+});
+
 const onTableNewsRequest = (props: any) => {
   let time = setTimeout(() => {
     $q.loading.hide();
@@ -729,13 +894,14 @@ const onTableNewsRequest = (props: any) => {
             title: resp.data.msg[i].title,
             date: resp.data.msg[i].date.replace(' +0800', ''),
             author: resp.data.msg[i].author,
-            content: decodeURIComponent(resp.data.msg[i].content),
+            content: Base64.decode(resp.data.msg[i].content),
             create_date: resp.data.msg[i].create_date.replace(' +0800', ''),
             create_user: resp.data.msg[i].create_user,
             create_id: resp.data.msg[i].create_id,
             update_date: resp.data.msg[i].update_date.replace(' +0800', ''),
             update_user: resp.data.msg[i].update_user,
             update_id: resp.data.msg[i].update_id,
+            delete: resp.data.msg[i].delete,
           });
         }
       } else {
@@ -782,7 +948,7 @@ const onTableNewsQuery = () => {
 };
 
 const onTableNewsNew = () => {
-  return;
+  dialog.value.news.show = true;
 };
 
 const onTableLinkRequest = (props: any) => {
@@ -1041,7 +1207,209 @@ const onTableUserQuery = () => {
     });
 };
 
-const onView = (val: string) => {
-  return;
+const onView = (val1: string, val2: any) => {
+  switch (val1) {
+    case 'news':
+      dialog.value.news.show = true;
+      dialog.value.news.id = val2.id;
+      dialog.value.news.title = val2.title;
+      dialog.value.news.date = val2.date;
+      dialog.value.news.author = val2.author;
+      dialog.value.news.content = val2.content;
+      break;
+    case 'slide':
+      dialog.value.slide.show = true;
+      dialog.value.slide.id = val2.id;
+      dialog.value.slide.title = val2.title;
+      dialog.value.slide.desc = val2.desc;
+      dialog.value.slide.link = val2.link;
+      dialog.value.slide.img = val2.img;
+      break;
+    case 'link':
+      dialog.value.link.show = true;
+      dialog.value.link.id = val2.id;
+      dialog.value.link.title = val2.title;
+      dialog.value.link.link = val2.link;
+      break;
+  }
+};
+
+const onDel = (val: string) => {
+  let time = setTimeout(() => {
+    $q.loading.hide();
+    clearTimeout(time);
+  }, 120000);
+
+  $q.loading.show();
+
+  switch (val) {
+    case 'news':
+      dialog.value.news.show = false;
+
+      useFetch()
+        .post(
+          store.backend + '/api/news/update',
+          {
+            id: dialog.value.news.id,
+            title: dialog.value.news.title,
+            date: dialog.value.news.date,
+            author: dialog.value.news.author,
+            content: Base64.encode(dialog.value.news.content),
+            update_user: store.user.familyname,
+            update_id: store.user.username,
+            delete: 1,
+          },
+          $q.cookies.get('canplay_token')
+        )
+        .then((resp) => {
+          if (resp.data.status === 1) {
+            onTableNewsQuery();
+          }
+
+          $q.loading.hide();
+          clearTimeout(time);
+        })
+        .catch(() => {
+          $q.notify('网络错误，请稍后重试');
+          $q.loading.hide();
+          clearTimeout(time);
+        });
+      break;
+  }
+};
+
+const onSave = (val: string) => {
+  let time = setTimeout(() => {
+    $q.loading.hide();
+    clearTimeout(time);
+  }, 120000);
+
+  $q.loading.show();
+
+  switch (val) {
+    case 'news':
+      dialog.value.news.show = false;
+
+      if (dialog.value.news.id === '') {
+        useFetch()
+          .post(
+            store.backend + '/api/news/add',
+            {
+              title: dialog.value.news.title,
+              date: dialog.value.news.date,
+              author: dialog.value.news.author,
+              content: Base64.encode(dialog.value.news.content),
+              create_user: store.user.familyname,
+              create_id: store.user.username,
+              update_user: store.user.familyname,
+              update_id: store.user.username,
+            },
+            $q.cookies.get('canplay_token')
+          )
+          .then((resp) => {
+            if (resp.data.status === 1) {
+              onTableNewsQuery();
+            }
+
+            $q.loading.hide();
+            clearTimeout(time);
+          })
+          .catch(() => {
+            $q.notify('网络错误，请稍后重试');
+            $q.loading.hide();
+            clearTimeout(time);
+          });
+      } else {
+        useFetch()
+          .post(
+            store.backend + '/api/news/update',
+            {
+              id: dialog.value.news.id,
+              title: dialog.value.news.title,
+              date: dialog.value.news.date,
+              author: dialog.value.news.author,
+              content: Base64.encode(dialog.value.news.content),
+              update_user: store.user.familyname,
+              update_id: store.user.username,
+              delete: 0,
+            },
+            $q.cookies.get('canplay_token')
+          )
+          .then((resp) => {
+            if (resp.data.status === 1) {
+              onTableNewsQuery();
+            }
+
+            $q.loading.hide();
+            clearTimeout(time);
+          })
+          .catch(() => {
+            $q.notify('网络错误，请稍后重试');
+            $q.loading.hide();
+            clearTimeout(time);
+          });
+      }
+      break;
+    case 'slide':
+      dialog.value.slide.show = false;
+
+      useFetch()
+        .post(
+          store.backend + '/api/slide/update',
+          {
+            id: dialog.value.slide.id,
+            title: dialog.value.slide.title,
+            desc: dialog.value.slide.desc,
+            link: dialog.value.slide.link,
+            img: dialog.value.slide.img,
+            update_user: store.user.familyname,
+            update_id: store.user.username,
+          },
+          $q.cookies.get('canplay_token')
+        )
+        .then((resp) => {
+          if (resp.data.status === 1) {
+            onTableSlideQuery();
+          }
+
+          $q.loading.hide();
+          clearTimeout(time);
+        })
+        .catch(() => {
+          $q.notify('网络错误，请稍后重试');
+          $q.loading.hide();
+          clearTimeout(time);
+        });
+      break;
+    case 'link':
+      dialog.value.link.show = false;
+
+      useFetch()
+        .post(
+          store.backend + '/api/link/update',
+          {
+            id: dialog.value.link.id,
+            title: dialog.value.link.title,
+            link: dialog.value.link.link,
+            update_user: store.user.familyname,
+            update_id: store.user.username,
+          },
+          $q.cookies.get('canplay_token')
+        )
+        .then((resp) => {
+          if (resp.data.status === 1) {
+            onTableLinkQuery();
+          }
+
+          $q.loading.hide();
+          clearTimeout(time);
+        })
+        .catch(() => {
+          $q.notify('网络错误，请稍后重试');
+          $q.loading.hide();
+          clearTimeout(time);
+        });
+      break;
+  }
 };
 </script>

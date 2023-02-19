@@ -464,6 +464,7 @@ import useFetch from 'components/fetch';
 import protocolCheck from 'components/protocolCheck';
 import i18n from 'src/i18n';
 import { marked } from 'marked';
+import { Base64 } from 'js-base64';
 
 const $q = useQuasar();
 const store = useStore();
@@ -786,15 +787,16 @@ useFetch()
   .then((resp) => {
     if (resp.data.status != 0) {
       for (let i = 0; i < resp.data.msg.length; ++i) {
-        if (resp.data.msg[i].id === '') break;
+        if (resp.data.msg[i].id === '' || resp.data.msg[i].delete === 1)
+          continue;
 
         news.value.push({
           id: resp.data.msg[i].id,
           title: resp.data.msg[i].title,
           date: resp.data.msg[i].date.replace(' +0800', ''),
           author: resp.data.msg[i].author,
-          desc: decodeURIComponent(resp.data.msg[i].content),
-          content: marked.parse(decodeURIComponent(resp.data.msg[i].content)),
+          desc: Base64.decode(resp.data.msg[i].content),
+          content: marked.parse(Base64.decode(resp.data.msg[i].content)),
           create_date: resp.data.msg[i].create_date.replace(' +0800', ''),
           create_user: resp.data.msg[i].create_user,
           create_id: resp.data.msg[i].create_id,

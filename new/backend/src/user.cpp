@@ -339,7 +339,7 @@ namespace api
 		time_t time = std::chrono::system_clock::to_time_t(now);
 		auto timestamp = fmt::format("{:%Y-%m-%d %H:%M:%S}", fmt::localtime(time));
 
-		auto stmt = fmt::format("UPDATE [PaGamePrivate].[TblUserInformation] SET [_isValid] = '1', [_userId] = N'{},{}', [_userNickname] = N'{}', [_isPcRoom] = '{}' WHERE [_userNo] = {};", (*json)["vaild"].asInt(), (*json)["username"].asString(), (*json)["password"].asString(), (*json)["nickname"].asString(), (*json)["pcroom"].asInt(), (*json)["no"].asInt());
+		auto stmt = fmt::format("UPDATE [SA_BETA_WORLDDB_0002].[PaGamePrivate].[TblUserInformation] SET [_isValid] = '1', [_userId] = N'{},{}', [_userNickname] = N'{}', [_isPcRoom] = '{}' WHERE [_userNo] = {};", (*json)["vaild"].asInt(), (*json)["username"].asString(), (*json)["password"].asString(), (*json)["nickname"].asString(), (*json)["pcroom"].asInt(), (*json)["no"].asInt());
 
 		Json::Value ret;
 

@@ -197,7 +197,6 @@ echo f | xcopy /y "$(VcpkgRoot)\installed\x64-windows\tools\crashpad_handler.exe
   </ItemGroup>
   <ItemGroup>
     <None Include="config.json" />
-    <None Include="version.json" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="backend.rc" />

@@ -9,7 +9,7 @@ namespace api
 	{
 		try
 		{
-			odbc = nanodbc::connection(datasource, username, password, 15);
+			odbc = nanodbc::connection(fmt::format("DSN={};UID={};PWD={};Mars_Connection=yes;", datasource, username, password), 15);
 			return odbc.connected();
 		}
 		catch (const std::exception& e)
@@ -33,15 +33,6 @@ namespace api
 
 	nanodbc::result MsSql::exec(std::string stmt)
 	{
-		try
-		{
-			return nanodbc::execute(odbc, stmt, 1, 15);
-		}
-		catch (const std::exception& e)
-		{
-			nanodbc::result r;
-			spdlog::error(e.what());
-			return r;
-		};
+		return nanodbc::execute(odbc, stmt, 1, 15);
 	}
 }

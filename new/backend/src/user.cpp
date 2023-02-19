@@ -7,6 +7,31 @@
 
 namespace api
 {
+	void User::count(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& callback) const
+	{
+		auto stmt = fmt::format("SELECT COUNT(_userNo) FROM [SA_BETA_WORLDDB_0002].[PaGamePrivate].[TblUserInformation]");
+
+		Json::Value ret;
+
+		try
+		{
+			Json::Value info;
+
+			auto r = MsSql::exec(stmt);
+			r.next();
+			ret["msg"] = r.get<int>(0);
+			ret["status"] = 1;
+		}
+		catch (const std::exception& e)
+		{
+			spdlog::warn("user count error: {}", e.what());
+			ret["msg"] = e.what();
+			ret["status"] = 0;
+		}
+
+		callback(HttpResponse::newHttpJsonResponse(ret));
+	}
+
 	void User::signup(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& callback) const
 	{
 		std::shared_ptr<Json::Value> json = req->getJsonObject();
@@ -55,19 +80,16 @@ namespace api
 
 					auto r = MsSql::exec(stmt);
 					r.next();
-					info["registerDate"] = r.get<std::string>(0);
-					info["isValid"] = r.get<std::string>(1);
-					info["userNo"] = r.get<int>(2);
-					info["userId"] = r.get<std::string>(3);
-					info["userNickname"] = r.get<std::string>(4);
-					info["lastLoginTime"] = r.get<std::string>(10);
-					info["lastLogoutTime"] = r.get<std::string>(11);
-					info["totalPlayTime"] = r.get<int>(12);
-					info["lastServerNo"] = r.get<int>(14);
-					info["lastWorldNo"] = r.get<int>(15);
-					info["serviceType"] = r.get<int>(16);
-					info["failPasswordCount"] = r.get<int>(17);
-					info["membershipType"] = r.get<int>(19);
+					info["registerDate"] = r.get<std::string>("_registerDate");
+					info["valid"] = r.get<std::string>("_isValid");
+					info["userNo"] = r.get<int>("_userNo");
+					info["userId"] = r.get<std::string>("_userId");
+					info["userNickname"] = r.get<std::string>("_userNickname");
+					info["lastLoginTime"] = r.get<std::string>("_lastLoginTime");
+					info["lastLogoutTime"] = r.get<std::string>("_lastLogoutTime");
+					info["totalPlayTime"] = r.get<int>("_totalPlayTime");
+					info["membershipType"] = r.get<int>("_membershipType");
+					info["pcroom"] = r.get<int>("_isPcRoom");
 
 					jwt jwtGenerated = jwt::generateToken(
 						{
@@ -127,19 +149,16 @@ namespace api
 
 			if (r.rows() != 0)
 			{
-				info["registerDate"] = r.get<std::string>(0);
-				info["isValid"] = r.get<std::string>(1);
-				info["userNo"] = r.get<int>(2);
-				info["userId"] = r.get<std::string>(3);
-				info["userNickname"] = r.get<std::string>(4);
-				info["lastLoginTime"] = r.get<std::string>(10);
-				info["lastLogoutTime"] = r.get<std::string>(11);
-				info["totalPlayTime"] = r.get<int>(12);
-				info["lastServerNo"] = r.get<int>(14);
-				info["lastWorldNo"] = r.get<int>(15);
-				info["serviceType"] = r.get<int>(16);
-				info["failPasswordCount"] = r.get<int>(17);
-				info["membershipType"] = r.get<int>(19);
+				info["registerDate"] = r.get<std::string>("_registerDate");
+				info["valid"] = r.get<std::string>("_isValid");
+				info["userNo"] = r.get<int>("_userNo");
+				info["userId"] = r.get<std::string>("_userId");
+				info["userNickname"] = r.get<std::string>("_userNickname");
+				info["lastLoginTime"] = r.get<std::string>("_lastLoginTime");
+				info["lastLogoutTime"] = r.get<std::string>("_lastLogoutTime");
+				info["totalPlayTime"] = r.get<int>("_totalPlayTime");
+				info["membershipType"] = r.get<int>("_membershipType");
+				info["pcroom"] = r.get<int>("_isPcRoom");
 
 				jwt jwtGenerated = jwt::generateToken(
 					{
@@ -177,7 +196,99 @@ namespace api
 	void User::signout(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& callback) const
 	{}
 
-	void User::info(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& callback, const std::string& id) const
+	void User::info(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& callback) const
+	{
+		std::shared_ptr<Json::Value> json = req->getJsonObject();
+		if (!json)
+		{
+			Json::Value ret;
+			ret["msg"] = "error";
+			ret["status"] = 0;
+			return callback(HttpResponse::newHttpJsonResponse(ret));
+		}
+
+		std::string stmt = fmt::format("SELECT TOP {} * FROM [SA_BETA_WORLDDB_0002].[PaGamePrivate].[TblUserInformation] WHERE _userNo NOT IN(SELECT TOP {} _userNo FROM [SA_BETA_WORLDDB_0002].[PaGamePrivate].[TblUserInformation]", (*json)["maxPage"].asInt64(), (*json)["curPage"].asInt64());
+
+		if ((*json)["sortBy"].asString() != "")
+		{
+			stmt = fmt::format("{} ORDER BY [{}] DESC) ORDER BY [{}]", stmt, (*json)["sortBy"].asString(), (*json)["sortBy"].asString());
+
+			if ((*json)["descending"].asBool())
+				stmt = fmt::format("{} DESC", stmt);
+			else
+				stmt = fmt::format("{} ASC", stmt);
+		}
+		else
+			stmt = fmt::format("{})", stmt);
+
+		Json::Value ret;
+
+		try
+		{
+			Json::Value infos;
+
+			auto r = MsSql::exec(stmt);
+
+			while (r.next())
+			{
+				Json::Value info;
+				info["registerDate"] = r.get<std::string>("_registerDate");
+				info["valid"] = r.get<std::string>("_isValid");
+				info["userNo"] = r.get<int>("_userNo");
+				info["userId"] = r.get<std::string>("_userId");
+				info["userNickname"] = r.get<std::string>("_userNickname");
+				info["lastLoginTime"] = r.get<std::string>("_lastLoginTime");
+				info["lastLogoutTime"] = r.get<std::string>("_lastLogoutTime");
+				info["totalPlayTime"] = r.get<int>("_totalPlayTime");
+				info["membershipType"] = r.get<int>("_membershipType");
+				info["pcroom"] = r.get<int>("_isPcRoom");
+
+				Json::Value characters;
+				auto stmt1 = fmt::format("SELECT * FROM [SA_BETA_GAMEDB_0002].[PaGamePrivate].[TblCharacterInformation] WHERE [_userNo] = {}", r.get<int>("_userNo"));
+				auto r1 = MsSql::exec(stmt1);
+				while (r1.next())
+				{
+					Json::Value character;
+					character["characterName"] = r1.get<std::string>("_characterName");
+					character["classType"] = r1.get<int>("_classType");
+					character["totalPlayTime"] = r1.get<int>("_totalPlayTime");
+					character["positionX"] = r1.get<int>("_currentPositionX");
+					character["positionY"] = r1.get<int>("_currentPositionY");
+					character["positionZ"] = r1.get<int>("_currentPositionZ");
+					character["level"] = r1.get<int>("_level");
+					character["experience"] = r1.get<int>("_experience");
+					character["skillPointLevel"] = r1.get<int>("_skillPointLevel");
+					character["skillPointExperience"] = r1.get<int>("_skillPointExperience");
+					character["hp"] = r1.get<int>("_hp");
+					character["mp"] = r1.get<int>("_mp");
+					character["sp"] = r1.get<int>("_sp");
+					character["wp"] = r1.get<int>("_wp");
+					character["inventorySlotCount"] = r1.get<int>("_inventorySlotCount");
+					character["variedWeight"] = r1.get<int>("_variedWeight");
+					character["offenceValue"] = r1.get<int>("_offenceValue");
+					character["defenceValue"] = r1.get<int>("_defenceValue");
+					character["awakenValue"] = r1.get<int>("_awakenValue");
+					characters.append(character);
+				}
+
+				info["characters"] = characters;
+				infos.append(info);
+			}
+
+			ret["msg"] = infos;
+			ret["status"] = 1;
+		}
+		catch (const std::exception& e)
+		{
+			spdlog::warn("user info error: {}", e.what());
+			ret["msg"] = e.what();
+			ret["status"] = 0;
+		}
+
+		callback(HttpResponse::newHttpJsonResponse(ret));
+	}
+
+	void User::infoOne(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& callback, const std::string& id) const
 	{
 		auto stmt = fmt::format("SELECT * FROM [SA_BETA_WORLDDB_0002].[PaGamePrivate].[TblUserInformation] WHERE _userNo = {}", id);
 
@@ -189,26 +300,23 @@ namespace api
 
 			auto r = MsSql::exec(stmt);
 			r.next();
-			info["registerDate"] = r.get<std::string>(0);
-			info["isValid"] = r.get<std::string>(1);
-			info["userNo"] = r.get<int>(2);
-			info["userId"] = r.get<std::string>(3);
-			info["userNickname"] = r.get<std::string>(4);
-			info["lastLoginTime"] = r.get<std::string>(10);
-			info["lastLogoutTime"] = r.get<std::string>(11);
-			info["totalPlayTime"] = r.get<int>(12);
-			info["lastServerNo"] = r.get<int>(14);
-			info["lastWorldNo"] = r.get<int>(15);
-			info["serviceType"] = r.get<int>(16);
-			info["failPasswordCount"] = r.get<int>(17);
-			info["membershipType"] = r.get<int>(19);
+			info["registerDate"] = r.get<std::string>("_registerDate");
+			info["valid"] = r.get<std::string>("_isValid");
+			info["userNo"] = r.get<int>("_userNo");
+			info["userId"] = r.get<std::string>("_userId");
+			info["userNickname"] = r.get<std::string>("_userNickname");
+			info["lastLoginTime"] = r.get<std::string>("_lastLoginTime");
+			info["lastLogoutTime"] = r.get<std::string>("_lastLogoutTime");
+			info["totalPlayTime"] = r.get<int>("_totalPlayTime");
+			info["membershipType"] = r.get<int>("_membershipType");
+			info["pcroom"] = r.get<int>("_isPcRoom");
 
 			ret["msg"] = info;
 			ret["status"] = 1;
 		}
 		catch (const std::exception& e)
 		{
-			spdlog::warn("info error: {}", e.what());
+			spdlog::warn("user info one error: {}", e.what());
 			ret["msg"] = e.what();
 			ret["status"] = 0;
 		}
@@ -226,5 +334,37 @@ namespace api
 			ret["status"] = 0;
 			return callback(HttpResponse::newHttpJsonResponse(ret));
 		}
+
+		auto now = std::chrono::system_clock::now();
+		time_t time = std::chrono::system_clock::to_time_t(now);
+		auto timestamp = fmt::format("{:%Y-%m-%d %H:%M:%S}", fmt::localtime(time));
+
+		auto stmt = fmt::format("UPDATE [PaGamePrivate].[TblUserInformation] SET [_isValid] = '1', [_userId] = N'{},{}', [_userNickname] = N'{}', [_isPcRoom] = '{}' WHERE [_userNo] = {};", (*json)["vaild"].asInt(), (*json)["username"].asString(), (*json)["password"].asString(), (*json)["nickname"].asString(), (*json)["pcroom"].asInt(), (*json)["no"].asInt());
+
+		Json::Value ret;
+
+		try
+		{
+			auto r = MsSql::exec(stmt);
+
+			if (r.affected_rows() == 1)
+			{
+				ret["msg"] = "ok";
+				ret["status"] = 1;
+			}
+			else
+			{
+				ret["msg"] = "news add error";
+				ret["status"] = 0;
+			}
+		}
+		catch (const std::exception& e)
+		{
+			spdlog::warn("news add error: {}", e.what());
+			ret["msg"] = e.what();
+			ret["status"] = 0;
+		}
+
+		callback(HttpResponse::newHttpJsonResponse(ret));
 	}
 }

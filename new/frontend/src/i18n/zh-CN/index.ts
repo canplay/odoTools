@@ -16,6 +16,11 @@ export default {
     title: '珍珠商城',
     hot: '热门商品',
     hotDesc: '珍珠商城',
+    name: '名称',
+    price: '价格',
+    storage: '库存',
+    desc: '说明',
+    date: '上架日期',
   },
   system: {
     title: '配置要求',
@@ -36,6 +41,8 @@ export default {
   search: '查找',
   launcher: {
     title: '开始',
-    download: '下载登录器',
+    msg: '没有安装登录器，是否立即下载？',
+    yes: '确定',
+    cancel: '取消',
   },
 };

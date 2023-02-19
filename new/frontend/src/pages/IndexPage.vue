@@ -1,6 +1,6 @@
 <template>
   <q-page padding>
-    <q-scroll-area style="height: calc(100vh - 56px - 50px - 32px)">
+    <q-scroll-area style="height: calc(100vh - 56px - 50px - 58px)">
       <div class="row" id="index">
         <q-carousel
           dark
@@ -97,7 +97,7 @@
               </div>
 
               <div class="text-h4">
-                游玩时间：{{ store.user.totalPlayTime }}
+                游玩时长：{{ store.user.totalPlayTime }}
               </div>
             </div>
 
@@ -164,7 +164,7 @@
                     background-image: url(imgs/slide/4.jpg);
                     background-position: right bottom, left top;
                     background-repeat: no-repeat, no-repeat;
-                    background-size: 100% 100%;
+                    background-size: cover;
                     z-index: -1;
                     filter: blur(3px);
                   "
@@ -179,7 +179,6 @@
                 class="col text-white text-bold"
                 size="48px"
                 type="reset"
-                v-if="$q.platform.is.electron"
               >
                 <div class="absolute-center">{{ $t('launcher.title') }}</div>
                 <div
@@ -188,29 +187,7 @@
                     background-image: url(imgs/slide/5.jpg);
                     background-position: right bottom, left top;
                     background-repeat: no-repeat, no-repeat;
-                    background-size: 100% 100%;
-                    z-index: -1;
-                    filter: blur(3px);
-                  "
-                />
-              </q-btn>
-
-              <q-btn
-                dark
-                flat
-                class="col text-white text-bold"
-                size="48px"
-                type="reset"
-                v-else
-              >
-                <div class="absolute-center">{{ $t('launcher.download') }}</div>
-                <div
-                  class="fit relative-position"
-                  style="
-                    background-image: url(imgs/slide/5.jpg);
-                    background-position: right bottom, left top;
-                    background-repeat: no-repeat, no-repeat;
-                    background-size: 100% 100%;
+                    background-size: cover;
                     z-index: -1;
                     filter: blur(3px);
                   "
@@ -223,26 +200,32 @@
 
       <div style="height: 8px" />
 
-      <q-img
-        class="rounded-borders"
-        src="imgs/slide/2.jpg"
-        height="300px"
-        id="shop"
-        @click="onShop"
-      >
-        <div class="absolute-bottom custom-caption">
-          <div class="text-h2">{{ $t('shop.hot') }}</div>
-          <div class="text-subtitle1">{{ $t('shop.hotDesc') }}</div>
-        </div>
-      </q-img>
+      <div class="row" style="height: 300px">
+        <q-btn dark flat id="shop" class="col" @click="onShop">
+          <div
+            class="fit relative-position"
+            style="
+              background-image: url(imgs/slide/2.jpg);
+              background-position: right bottom, left top;
+              background-repeat: no-repeat, no-repeat;
+              background-size: cover;
+              z-index: -1;
+            "
+          />
+          <div class="absolute-bottom custom-caption">
+            <div class="text-h2">{{ $t('shop.hot') }}</div>
+            <div class="text-subtitle1">{{ $t('shop.hotDesc') }}</div>
+          </div>
+        </q-btn>
+      </div>
 
       <div style="height: 8px" />
 
       <q-table
         dark
         separator="cell"
-        :columns="columns"
-        :rows="rows"
+        :columns="system.columns"
+        :rows="system.rows"
         row-key="class"
         hide-bottom
       >
@@ -295,7 +278,7 @@
           flat
           class="col text-white text-bold"
           size="24px"
-          @click="urlopen('https://www.nvidia.com/Download/index.aspx')"
+          @click="openURL(link.nvidia)"
         >
           <div class="absolute-center">{{ $t('nvidia') }}</div>
           <div
@@ -304,7 +287,7 @@
               background-image: url(imgs/slide/5.jpg);
               background-position: right bottom, left top;
               background-repeat: no-repeat, no-repeat;
-              background-size: 100% 100%;
+              background-size: cover;
               z-index: -1;
               filter: blur(3px);
             "
@@ -318,7 +301,7 @@
           flat
           class="col text-white text-bold"
           size="24px"
-          @click="urlopen('https://www.amd.com/en/support')"
+          @click="openURL(link.amd)"
         >
           <div class="absolute-center">{{ $t('amd') }}</div>
           <div
@@ -327,7 +310,7 @@
               background-image: url(imgs/slide/5.jpg);
               background-position: right bottom, left top;
               background-repeat: no-repeat, no-repeat;
-              background-size: 100% 100%;
+              background-size: cover;
               z-index: -1;
               filter: blur(3px);
             "
@@ -338,7 +321,13 @@
       <div style="height: 8px" />
 
       <div class="row" id="downloads">
-        <q-btn dark flat class="col text-white text-bold" size="48px">
+        <q-btn
+          dark
+          flat
+          class="col text-white text-bold"
+          size="48px"
+          @click="openURL(link.client)"
+        >
           <div class="absolute-center">{{ $t('client') }}</div>
           <div
             class="fit relative-position"
@@ -346,7 +335,7 @@
               background-image: url(imgs/slide/5.jpg);
               background-position: right bottom, left top;
               background-repeat: no-repeat, no-repeat;
-              background-size: 100% 100%;
+              background-size: cover;
               z-index: -1;
               filter: blur(3px);
             "
@@ -363,7 +352,7 @@
             <q-btn dark flat class="col" icon="img:imgs/weibo.svg" />
             <q-btn dark flat class="col" icon="img:imgs/qq.svg" />
             <q-btn dark flat class="col" icon="img:imgs/wechat.svg" />
-            <q-btn dark flat class="col" icon="img:imgs/discord.svg" />
+            <q-btn dark flat class="col" icon="img:imgs/github.svg" />
             <q-btn dark flat class="col" icon="img:imgs/telegram.svg" />
             <q-btn dark flat class="col" icon="img:imgs/discord.svg" />
           </div>
@@ -373,8 +362,8 @@
   </q-page>
 
   <q-dialog v-model="dialog.news.show">
-    <q-card dark style="width: 90vw; height: 80vh">
-      <q-card-section>
+    <q-card dark style="min-width: 80vw; height: 80vh">
+      <q-card-section class="fit column">
         <div class="text-h4 text-bold">{{ dialog.news.title }}</div>
 
         <div style="height: 8px" />
@@ -383,14 +372,16 @@
 
         <div style="height: 8px" />
 
-        <div>{{ dialog.news.content }}</div>
+        <q-scroll-area class="col">
+          <div v-html="dialog.news.content" />
+        </q-scroll-area>
       </q-card-section>
     </q-card>
   </q-dialog>
 
   <q-dialog v-model="dialog.shop.show">
-    <q-card dark style="width: 90%; height: 80vh">
-      <q-card-section>
+    <q-card dark style="min-width: 80vw; height: 80vh">
+      <q-card-section class="fit">
         <q-table
           dark
           :rows="dialog.shop.rows"
@@ -402,6 +393,7 @@
           v-model:pagination="dialog.shop.pagination"
           grid
           hide-header
+          class="fit"
         >
           <template v-slot:top>
             <div class="row fit">
@@ -426,28 +418,23 @@
           <template v-slot:item="props">
             <div
               class="q-pa-xs col-xs-12 col-sm-6 col-md-4 col-lg-3 grid-style-transition"
-              :style="props.selected ? 'transform: scale(0.95);' : ''"
             >
-              <q-card dark :class="props.selected ? 'bg-grey-2' : ''">
+              <q-card dark :class="props.selected ? 'bg-primary' : ''">
                 <q-card-section>
                   <q-checkbox
+                    dark
                     dense
                     v-model="props.selected"
                     :label="props.row.name"
                   />
                 </q-card-section>
+
                 <q-separator />
-                <q-list dense>
-                  <q-item
-                    v-for="col in props.cols.filter(
-                      (col) => col.name !== 'desc'
-                    )"
-                    :key="col.name"
-                  >
+
+                <q-list dark>
+                  <q-item v-for="col in props.cols" :key="col.name">
                     <q-item-section>
-                      <q-item-label>{{ col.label }}</q-item-label>
-                    </q-item-section>
-                    <q-item-section side>
+                      <q-item-label>{{ $t(col.label) }}</q-item-label>
                       <q-item-label caption>{{ col.value }}</q-item-label>
                     </q-item-section>
                   </q-item>
@@ -474,8 +461,9 @@ import { ref } from 'vue';
 import { useQuasar, QTableProps, openURL } from 'quasar';
 import { useStore } from 'src/stores/store';
 import useFetch from 'components/fetch';
-import { compareVersions } from 'compare-versions';
-import version from '../../public/version.json';
+import protocolCheck from 'components/protocolCheck';
+import i18n from 'src/i18n';
+import { marked } from 'marked';
 
 const $q = useQuasar();
 const store = useStore();
@@ -490,83 +478,98 @@ const password = ref('');
 const isPwd = ref(true);
 const accept = ref(false);
 
-const columns = [
-  {
-    name: 'class',
-    label: 'system.class',
-    field: 'class',
-    align: 'center',
-    classes: 'text-bold',
-  },
-  {
-    name: 'min',
-    label: 'system.min',
-    field: 'min',
-    align: 'center',
-  },
-  {
-    name: 'rec',
-    label: 'system.rec',
-    field: 'rec',
-    align: 'center',
-  },
-  {
-    name: 'rem',
-    label: 'system.rem',
-    field: 'rem',
-    align: 'center',
-  },
-  {
-    name: 'max',
-    label: 'system.max',
-    field: 'max',
-    align: 'center',
-  },
-] as QTableProps['columns'];
+const link = ref({
+  nvidia: '',
+  amd: '',
+  client: '',
+  launcher: '',
+  weibo: '',
+  qq: '',
+  wechat: '',
+  github: '',
+  telegram: '',
+  discord: '',
+});
 
-const rows = ref([
-  {
-    class: 'system.cpu',
-    min: 'Intel Core i3',
-    rec: 'Intel Core i5',
-    rem: 'Intel Core i7-8700',
-    max: 'Intel Core i7-8700K',
-  },
-  {
-    class: 'system.disk',
-    min: '~41GB',
-    rec: '~41GB',
-    rem: '~41GB',
-    max: '~41GB',
-  },
-  {
-    class: 'system.ram',
-    min: '4GB',
-    rec: '8GB',
-    rem: '16GB',
-    max: '32GB',
-  },
-  {
-    class: 'system.graphics',
-    min: 'NVIDIA GTS 250、AMD HD 3870 X2',
-    rec: 'NVIDIA GTX 970、AMD RX 480',
-    rem: 'NVIDIA GTX 1070 8GB',
-    max: 'NVIDIA GTX 1080ti 11GB',
-  },
-  {
-    class: 'system.os',
-    min: 'Windows 10 x64',
-    rec: 'Windows 10 x64',
-    rem: 'Windows 10 x64',
-    max: 'Windows 10 x64',
-  },
-] as any);
+const system = ref({
+  columns: [
+    {
+      name: 'class',
+      label: 'system.class',
+      field: 'class',
+      align: 'center',
+      classes: 'text-bold',
+    },
+    {
+      name: 'min',
+      label: 'system.min',
+      field: 'min',
+      align: 'center',
+    },
+    {
+      name: 'rec',
+      label: 'system.rec',
+      field: 'rec',
+      align: 'center',
+    },
+    {
+      name: 'rem',
+      label: 'system.rem',
+      field: 'rem',
+      align: 'center',
+    },
+    {
+      name: 'max',
+      label: 'system.max',
+      field: 'max',
+      align: 'center',
+    },
+  ] as QTableProps['columns'],
+  rows: [
+    {
+      class: 'system.cpu',
+      min: 'Intel Core i3',
+      rec: 'Intel Core i5',
+      rem: 'Intel Core i7-8700',
+      max: 'Intel Core i7-8700K',
+    },
+    {
+      class: 'system.disk',
+      min: '~41GB',
+      rec: '~41GB',
+      rem: '~41GB',
+      max: '~41GB',
+    },
+    {
+      class: 'system.ram',
+      min: '4GB',
+      rec: '8GB',
+      rem: '16GB',
+      max: '32GB',
+    },
+    {
+      class: 'system.graphics',
+      min: 'NVIDIA GTS 250、AMD HD 3870 X2',
+      rec: 'NVIDIA GTX 970、AMD RX 480',
+      rem: 'NVIDIA GTX 1070 8GB',
+      max: 'NVIDIA GTX 1080ti 11GB',
+    },
+    {
+      class: 'system.os',
+      min: 'Windows 10 x64',
+      rec: 'Windows 10 x64',
+      rem: 'Windows 10 x64',
+      max: 'Windows 10 x64',
+    },
+  ] as any,
+});
 
 const dialog = ref({
   news: {
     show: false,
     title: '',
     date: '',
+    desc: '',
     content: '',
   },
   shop: {
@@ -574,46 +577,49 @@ const dialog = ref({
     pagination: {
       page: 1,
       rowsNumber: 0,
-      rowsPerPage: 7,
-      sortBy: null,
+      rowsPerPage: 10,
+      sortBy: 'create_date',
       descending: true,
     } as any,
     columns: [
       {
         name: 'name',
-        required: true,
-        label: 'Dessert (100g serving)',
+        label: 'shop.name',
+        field: 'name',
         align: 'left',
       },
       {
-        name: 'calories',
-        align: 'center',
-        label: 'Calories',
-        field: 'calories',
-        sortable: true,
+        name: 'price',
+        label: 'shop.price',
+        field: 'price',
+        align: 'left',
       },
-      { name: 'fat', label: 'Fat (g)', field: 'fat', sortable: true },
-      { name: 'carbs', label: 'Carbs (g)', field: 'carbs' },
-      { name: 'protein', label: 'Protein (g)', field: 'protein' },
-      { name: 'sodium', label: 'Sodium (mg)', field: 'sodium' },
       {
-        name: 'calcium',
-        label: 'Calcium (%)',
-        field: 'calcium',
-        sortable: true,
+        name: 'storage',
+        label: 'shop.storage',
+        field: 'storage',
+        align: 'left',
       },
-      { name: 'iron', label: 'Iron (%)', field: 'iron', sortable: true },
+      {
+        name: 'desc',
+        label: 'shop.desc',
+        field: 'desc',
+        align: 'left',
+      },
+      {
+        name: 'date',
+        label: 'shop.date',
+        field: 'date',
+        align: 'left',
+      },
     ] as QTableProps['columns'],
     rows: [
       {
-        name: 'Frozen Yogurt',
-        calories: 159,
-        fat: 6.0,
-        carbs: 24,
-        protein: 4.0,
-        sodium: 87,
-        calcium: '14%',
-        iron: '1%',
+        name: '测试商品',
+        price: 50.0,
+        storage: 99,
+        desc: '测试商品说明',
+        date: '2023-2-19',
       },
     ] as any,
     filter: '',
@@ -621,30 +627,38 @@ const dialog = ref({
   },
 });
 
-for (let index = 0; index < 8; index++) {
-  news.value.push({
-    title: '新闻标题' + index,
-    desc: '新闻简介',
-    date: '2023-2-15',
-    link: '',
-  });
-}
-
-for (let index = 0; index < 5; index++) {
-  slide.value.list.push({
-    title: '滚动图标题' + index,
-    desc: '滚动图简介',
-    img: 'imgs/slide/' + (index + 1) + '.jpg',
-  });
-}
-
 const onSignin = () => {
   if (store.user.signin) {
-    if ($q.platform.is.electron) {
-      window.electron.launcher(store.user.username, store.user.password);
-    } else {
-      window.location.href = store.backend + '/downloads/launcher.exe';
-    }
+    protocolCheck(
+      'bdolauncher://' + store.user.username + ',' + store.user.password,
+      () => {
+        let lang = i18n['zh-CN'];
+        if ($q.lang.isoName === 'en-US') {
+          lang = i18n['en-US'];
+        }
+
+        $q.notify({
+          message: lang.launcher.msg,
+          type: 'negative',
+          actions: [
+            {
+              label: lang.launcher.yes,
+              color: 'white',
+              handler: () => {
+                window.location.href = '';
+              },
+            },
+            {
+              label: lang.launcher.cancel,
+              color: 'white',
+              handler: () => {
+                return;
+              },
+            },
+          ],
+        });
+      }
+    );
   } else {
     let time = setTimeout(() => {
       $q.loading.hide();
@@ -752,7 +766,8 @@ const onNews = (val: any) => {
     show: true,
     title: val.title,
     date: val.date,
-    content: val.desc,
+    desc: val.desc,
+    content: val.content,
   };
 };
 
@@ -760,42 +775,126 @@ const onShop = (val: any) => {
   dialog.value.shop.show = true;
 };
 
-const urlopen = (val: string) => {
-  if ($q.platform.is.electron) {
-    window.electron.openurl(val);
-  } else {
-    openURL(val);
-  }
-};
-
 useFetch()
-  .get(store.backend + '/downloads/version.json')
+  .post(store.backend + '/api/news/info', {
+    curPage: 0,
+    maxPage: 10,
+    sortBy: 'create_date',
+    descending: true,
+    delete: 0,
+  })
   .then((resp) => {
-    store.update.remote = resp.data;
+    if (resp.data.status != 0) {
+      for (let i = 0; i < resp.data.msg.length; ++i) {
+        if (resp.data.msg[i].id === '') break;
 
-    if (
-      compareVersions(
-        store.update.remote.launcher.version,
-        version.launcher.version
-      )
-    ) {
-      store.update.status = '检查到登录器新版本';
-    }
-
-    if (compareVersions(store.update.remote.app.version, version.app.version)) {
-      store.update.status = '检查到客户端新版本';
-    }
-
-    if (
-      compareVersions(
-        store.update.remote.resource.version,
-        version.resource.version
-      )
-    ) {
-      store.update.status = '检查到客户端资源新版本';
+        news.value.push({
+          id: resp.data.msg[i].id,
+          title: resp.data.msg[i].title,
+          date: resp.data.msg[i].date.replace(' +0800', ''),
+          author: resp.data.msg[i].author,
+          desc: decodeURIComponent(resp.data.msg[i].content),
+          content: marked.parse(decodeURIComponent(resp.data.msg[i].content)),
+          create_date: resp.data.msg[i].create_date.replace(' +0800', ''),
+          create_user: resp.data.msg[i].create_user,
+          create_id: resp.data.msg[i].create_id,
+          update_date: resp.data.msg[i].update_date.replace(' +0800', ''),
+          update_user: resp.data.msg[i].update_user,
+          update_id: resp.data.msg[i].update_id,
+        });
+      }
+    } else {
+      $q.notify('网络错误，请稍后重试');
     }
   })
   .catch(() => {
-    store.update.status = '检查更新失败';
+    $q.notify('网络错误，请稍后重试');
+  });
+
+useFetch()
+  .post(store.backend + '/api/slide/info', {
+    curPage: 0,
+    maxPage: 10,
+    sortBy: 'create_date',
+    descending: true,
+  })
+  .then((resp) => {
+    if (resp.data.status != 0) {
+      for (let i = 0; i < resp.data.msg.length; ++i) {
+        if (resp.data.msg[i].id === '') break;
+
+        slide.value.list.push({
+          id: resp.data.msg[i].id,
+          title: resp.data.msg[i].title,
+          desc: resp.data.msg[i].desc,
+          link: resp.data.msg[i].link,
+          create_date: resp.data.msg[i].create_date.replace(' +0800', ''),
+          create_user: resp.data.msg[i].create_user,
+          create_id: resp.data.msg[i].create_id,
+          update_date: resp.data.msg[i].update_date.replace(' +0800', ''),
+          update_user: resp.data.msg[i].update_user,
+          update_id: resp.data.msg[i].update_id,
+          img: resp.data.msg[i].img,
+        });
+      }
+    } else {
+      $q.notify('网络错误，请稍后重试');
+    }
+  })
+  .catch(() => {
+    $q.notify('网络错误，请稍后重试');
+  });
+
+useFetch()
+  .post(store.backend + '/api/link/info', {
+    curPage: 0,
+    maxPage: 10,
+    sortBy: 'create_date',
+    descending: true,
+  })
+  .then((resp) => {
+    if (resp.data.status != 0) {
+      for (let i = 0; i < resp.data.msg.length; ++i) {
+        if (resp.data.msg[i].id === '') break;
+
+        switch (resp.data.msg[i].title) {
+          case 'nvidia':
+            link.value.nvidia = resp.data.msg[i].link;
+            break;
+          case 'amd':
+            link.value.amd = resp.data.msg[i].link;
+            break;
+          case 'client':
+            link.value.client = resp.data.msg[i].link;
+            break;
+          case 'launcher':
+            link.value.launcher = resp.data.msg[i].link;
+            break;
+          case 'weibo':
+            link.value.weibo = resp.data.msg[i].link;
+            break;
+          case 'qq':
+            link.value.qq = resp.data.msg[i].link;
+            break;
+          case 'wechat':
+            link.value.wechat = resp.data.msg[i].link;
+            break;
+          case 'github':
+            link.value.github = resp.data.msg[i].link;
+            break;
+          case 'telegram':
+            link.value.telegram = resp.data.msg[i].link;
+            break;
+          case 'discord':
+            link.value.discord = resp.data.msg[i].link;
+            break;
+        }
+      }
+    } else {
+      $q.notify('网络错误，请稍后重试');
+    }
+  })
+  .catch(() => {
+    $q.notify('网络错误，请稍后重试');
   });
 </script>

@@ -9,7 +9,7 @@
     "
   >
     <q-header elevated>
-      <q-toolbar class="bg-grey-10 text-white row q-electron-drag">
+      <q-toolbar class="bg-grey-10 text-white row">
         <q-img class="col-auto" src="imgs/logo.png" width="240px" />
 
         <div class="col-auto" style="width: 30px" />
@@ -57,42 +57,10 @@
     </q-header>
 
     <q-footer elevated>
-      <q-toolbar class="bg-grey-10 text-center row">
-        <q-linear-progress
-          dark
-          rounded
-          class="col electron-only"
-          :value="store.update.progress"
-          size="32px"
-          color="accent"
-        >
-          <div class="absolute-full flex flex-center">
-            <q-badge
-              color="white"
-              text-color="accent"
-              :label="store.update.status"
-            />
-          </div>
-        </q-linear-progress>
-
-        <q-toolbar-title
-          v-if="$q.platform.is.electron"
-          class="col-8 electron-only"
-          style="font-size: medium"
-        >
+      <q-toolbar class="bg-grey-10 text-white text-center">
+        <q-toolbar-title style="font-size: medium">
           Powered by CaNplay
         </q-toolbar-title>
-
-        <q-toolbar-title v-else class="col" style="font-size: medium">
-          Powered by CaNplay
-        </q-toolbar-title>
-
-        <q-btn
-          class="col electron-only"
-          color="accent"
-          label="退出"
-          @click="onClose"
-        />
       </q-toolbar>
     </q-footer>
 
@@ -101,13 +69,6 @@
     </q-page-container>
   </q-layout>
 </template>
-
-<style>
-* {
-  -webkit-user-select: none;
-  -webkit-touch-callout: none;
-}
-</style>
 
 <script setup lang="ts">
 import { ref } from 'vue';

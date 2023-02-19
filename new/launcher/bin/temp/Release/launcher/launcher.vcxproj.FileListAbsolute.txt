@@ -1,0 +1,3 @@
+F:\odoTools\new\launcher\bin\temp\Release\launcher\launcher.vcxproj.CopyComplete
+F:\odoTools\new\launcher\bin\temp\Release\launcher\launcher.exe
+F:\odoTools\new\launcher\bin\temp\Release\launcher\fmt.dll

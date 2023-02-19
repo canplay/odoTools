@@ -16,6 +16,11 @@ export default {
     title: 'Shop',
     hot: 'Hot',
     hotDesc: 'Shop',
+    name: 'Name',
+    price: 'Price',
+    storage: 'Storage',
+    desc: 'Desc',
+    date: 'Date',
   },
   system: {
     title: 'System Requirements',
@@ -36,6 +41,8 @@ export default {
   search: 'Search',
   launcher: {
     title: 'Start',
-    download: 'Download Launcher',
+    msg: 'Can`t start Launcher, Install now ?',
+    yes: 'Yes',
+    cancel: 'Cancel',
   },
 };

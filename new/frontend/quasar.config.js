@@ -93,7 +93,7 @@ module.exports = configure(function (/* ctx */) {
       open: true, // opens browser window automatically
       proxy: {
         '/backend': {
-          target: 'http://cltgames.ddns.me:51530',
+          target: 'http://1.13.22.82:51530',
           changeOrigin: true,
           rewrite: (path) => path.replace(/^\/backend/, ''),
         },

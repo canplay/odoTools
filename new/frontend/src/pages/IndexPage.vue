@@ -781,10 +781,10 @@ if (window.location.hostname === 'localhost') {
 }
 
 useFetch()
-  .get(store.backend + '/api/settings/info')
+  .get(store.backend + '/api/settings/url')
   .then((resp) => {
     if (resp.data.status != 0) {
-      store.backend = resp.data.msg.url;
+      store.backend = resp.data.msg.value;
 
       useFetch()
         .post(store.backend + '/api/news/info', {

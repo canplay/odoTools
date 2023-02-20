@@ -1,3 +1,0 @@
-F:\odoTools\new\launcher\bin\temp\Debug\launcher\launcher.vcxproj.CopyComplete
-F:\odoTools\new\launcher\bin\temp\Debug\launcher\launcher.exe
-F:\odoTools\new\launcher\bin\temp\Debug\launcher\fmtd.dll

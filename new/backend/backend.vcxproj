@@ -172,6 +172,7 @@ echo f | xcopy /y "$(VcpkgRoot)\installed\x64-windows\tools\crashpad_handler.exe
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\mssql.cpp" />
     <ClCompile Include="src\news.cpp" />
+    <ClCompile Include="src\settings.cpp" />
     <ClCompile Include="src\slide.cpp" />
     <ClCompile Include="src\stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
@@ -190,6 +191,7 @@ echo f | xcopy /y "$(VcpkgRoot)\installed\x64-windows\tools\crashpad_handler.exe
     <ClInclude Include="include\link.h" />
     <ClInclude Include="include\mssql.h" />
     <ClInclude Include="include\news.h" />
+    <ClInclude Include="include\settings.h" />
     <ClInclude Include="include\slide.h" />
     <ClInclude Include="include\stdafx.h" />
     <ClInclude Include="include\resource.h" />

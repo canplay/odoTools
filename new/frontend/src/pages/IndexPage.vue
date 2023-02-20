@@ -776,122 +776,139 @@ const onShop = (val: any) => {
   dialog.value.shop.show = true;
 };
 
+if (window.location.hostname === 'localhost') {
+  store.backend = 'http://localhost:51530';
+}
+
 useFetch()
-  .post(store.backend + '/api/news/info', {
-    curPage: 0,
-    maxPage: 10,
-    sortBy: 'create_date',
-    descending: true,
-    delete: 0,
-  })
+  .get(store.backend + '/api/settings/info')
   .then((resp) => {
     if (resp.data.status != 0) {
-      for (let i = 0; i < resp.data.msg.length; ++i) {
-        if (resp.data.msg[i].id === '' || resp.data.msg[i].delete === 1)
-          continue;
+      store.backend = resp.data.msg.url;
 
-        news.value.push({
-          id: resp.data.msg[i].id,
-          title: resp.data.msg[i].title,
-          date: resp.data.msg[i].date.replace(' +0800', ''),
-          author: resp.data.msg[i].author,
-          desc: Base64.decode(resp.data.msg[i].content),
-          content: marked.parse(Base64.decode(resp.data.msg[i].content)),
-          create_date: resp.data.msg[i].create_date.replace(' +0800', ''),
-          create_user: resp.data.msg[i].create_user,
-          create_id: resp.data.msg[i].create_id,
-          update_date: resp.data.msg[i].update_date.replace(' +0800', ''),
-          update_user: resp.data.msg[i].update_user,
-          update_id: resp.data.msg[i].update_id,
+      useFetch()
+        .post(store.backend + '/api/news/info', {
+          curPage: 0,
+          maxPage: 10,
+          sortBy: 'create_date',
+          descending: true,
+          delete: 0,
+        })
+        .then((resp) => {
+          if (resp.data.status != 0) {
+            for (let i = 0; i < resp.data.msg.length; ++i) {
+              if (resp.data.msg[i].id === '' || resp.data.msg[i].delete === 1)
+                continue;
+
+              news.value.push({
+                id: resp.data.msg[i].id,
+                title: resp.data.msg[i].title,
+                date: resp.data.msg[i].date.replace(' +0800', ''),
+                author: resp.data.msg[i].author,
+                desc: Base64.decode(resp.data.msg[i].content),
+                content: marked.parse(Base64.decode(resp.data.msg[i].content)),
+                create_date: resp.data.msg[i].create_date.replace(' +0800', ''),
+                create_user: resp.data.msg[i].create_user,
+                create_id: resp.data.msg[i].create_id,
+                update_date: resp.data.msg[i].update_date.replace(' +0800', ''),
+                update_user: resp.data.msg[i].update_user,
+                update_id: resp.data.msg[i].update_id,
+              });
+            }
+          } else {
+            $q.notify('网络错误，请稍后重试');
+          }
+        })
+        .catch(() => {
+          $q.notify('网络错误，请稍后重试');
         });
-      }
-    } else {
-      $q.notify('网络错误，请稍后重试');
-    }
-  })
-  .catch(() => {
-    $q.notify('网络错误，请稍后重试');
-  });
 
-useFetch()
-  .post(store.backend + '/api/slide/info', {
-    curPage: 0,
-    maxPage: 10,
-    sortBy: 'create_date',
-    descending: true,
-  })
-  .then((resp) => {
-    if (resp.data.status != 0) {
-      for (let i = 0; i < resp.data.msg.length; ++i) {
-        if (resp.data.msg[i].id === '') break;
+      useFetch()
+        .post(store.backend + '/api/slide/info', {
+          curPage: 0,
+          maxPage: 10,
+          sortBy: 'create_date',
+          descending: true,
+        })
+        .then((resp) => {
+          if (resp.data.status != 0) {
+            for (let i = 0; i < resp.data.msg.length; ++i) {
+              if (resp.data.msg[i].id === '') break;
 
-        slide.value.list.push({
-          id: resp.data.msg[i].id,
-          title: resp.data.msg[i].title,
-          desc: resp.data.msg[i].desc,
-          link: resp.data.msg[i].link,
-          create_date: resp.data.msg[i].create_date.replace(' +0800', ''),
-          create_user: resp.data.msg[i].create_user,
-          create_id: resp.data.msg[i].create_id,
-          update_date: resp.data.msg[i].update_date.replace(' +0800', ''),
-          update_user: resp.data.msg[i].update_user,
-          update_id: resp.data.msg[i].update_id,
-          img: resp.data.msg[i].img,
+              slide.value.list.push({
+                id: resp.data.msg[i].id,
+                title: resp.data.msg[i].title,
+                desc: resp.data.msg[i].desc,
+                link: resp.data.msg[i].link,
+                create_date: resp.data.msg[i].create_date.replace(' +0800', ''),
+                create_user: resp.data.msg[i].create_user,
+                create_id: resp.data.msg[i].create_id,
+                update_date: resp.data.msg[i].update_date.replace(' +0800', ''),
+                update_user: resp.data.msg[i].update_user,
+                update_id: resp.data.msg[i].update_id,
+                img: resp.data.msg[i].img,
+              });
+            }
+          } else {
+            $q.notify('网络错误，请稍后重试');
+          }
+        })
+        .catch(() => {
+          $q.notify('网络错误，请稍后重试');
         });
-      }
-    } else {
-      $q.notify('网络错误，请稍后重试');
-    }
-  })
-  .catch(() => {
-    $q.notify('网络错误，请稍后重试');
-  });
 
-useFetch()
-  .post(store.backend + '/api/link/info', {
-    curPage: 0,
-    maxPage: 10,
-    sortBy: 'create_date',
-    descending: true,
-  })
-  .then((resp) => {
-    if (resp.data.status != 0) {
-      for (let i = 0; i < resp.data.msg.length; ++i) {
-        if (resp.data.msg[i].id === '') break;
+      useFetch()
+        .post(store.backend + '/api/link/info', {
+          curPage: 0,
+          maxPage: 10,
+          sortBy: 'create_date',
+          descending: true,
+        })
+        .then((resp) => {
+          if (resp.data.status != 0) {
+            for (let i = 0; i < resp.data.msg.length; ++i) {
+              if (resp.data.msg[i].id === '') break;
 
-        switch (resp.data.msg[i].title) {
-          case 'nvidia':
-            link.value.nvidia = resp.data.msg[i].link;
-            break;
-          case 'amd':
-            link.value.amd = resp.data.msg[i].link;
-            break;
-          case 'client':
-            link.value.client = resp.data.msg[i].link;
-            break;
-          case 'launcher':
-            link.value.launcher = resp.data.msg[i].link;
-            break;
-          case 'weibo':
-            link.value.weibo = resp.data.msg[i].link;
-            break;
-          case 'qq':
-            link.value.qq = resp.data.msg[i].link;
-            break;
-          case 'wechat':
-            link.value.wechat = resp.data.msg[i].link;
-            break;
-          case 'github':
-            link.value.github = resp.data.msg[i].link;
-            break;
-          case 'telegram':
-            link.value.telegram = resp.data.msg[i].link;
-            break;
-          case 'discord':
-            link.value.discord = resp.data.msg[i].link;
-            break;
-        }
-      }
+              switch (resp.data.msg[i].title) {
+                case 'nvidia':
+                  link.value.nvidia = resp.data.msg[i].link;
+                  break;
+                case 'amd':
+                  link.value.amd = resp.data.msg[i].link;
+                  break;
+                case 'client':
+                  link.value.client = resp.data.msg[i].link;
+                  break;
+                case 'launcher':
+                  link.value.launcher = resp.data.msg[i].link;
+                  break;
+                case 'weibo':
+                  link.value.weibo = resp.data.msg[i].link;
+                  break;
+                case 'qq':
+                  link.value.qq = resp.data.msg[i].link;
+                  break;
+                case 'wechat':
+                  link.value.wechat = resp.data.msg[i].link;
+                  break;
+                case 'github':
+                  link.value.github = resp.data.msg[i].link;
+                  break;
+                case 'telegram':
+                  link.value.telegram = resp.data.msg[i].link;
+                  break;
+                case 'discord':
+                  link.value.discord = resp.data.msg[i].link;
+                  break;
+              }
+            }
+          } else {
+            $q.notify('网络错误，请稍后重试');
+          }
+        })
+        .catch(() => {
+          $q.notify('网络错误，请稍后重试');
+        });
     } else {
       $q.notify('网络错误，请稍后重试');
     }

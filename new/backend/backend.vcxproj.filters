@@ -51,6 +51,9 @@
     <ClCompile Include="src\link.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="src\settings.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\stdafx.h">
@@ -93,6 +96,9 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="include\link.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="include\settings.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

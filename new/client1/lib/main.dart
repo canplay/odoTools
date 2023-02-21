@@ -1,5 +1,7 @@
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:window_manager/window_manager.dart';
 
 void main() async {
@@ -29,9 +31,9 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      themeMode: ThemeMode.dark,
-      home: MyHomePage(),
+    return MaterialApp(
+      home: const MyHomePage(),
+      builder: FlutterSmartDialog.init(),
     );
   }
 }
@@ -44,13 +46,27 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> with WindowListener {
-  final List<String> entries = <String>['测试新闻', '测试新闻', '测试新闻', '测试新闻', '测试新闻'];
-  final List<int> colorCodes = <int>[600, 500, 400, 300, 200];
+  final remoteUrl = "http://1.13.22.82:51530";
+
+  Dio dio = Dio(
+    BaseOptions(
+      connectTimeout: const Duration(seconds: 5),
+      receiveTimeout: const Duration(seconds: 5),
+    ),
+  );
+
+  List<Map<String, dynamic>> news = [];
+
+  String status = "正在检查网络链接...";
+
+  TextEditingController usernameController = TextEditingController();
+  TextEditingController passwordController = TextEditingController();
 
   @override
   void initState() {
     windowManager.addListener(this);
     super.initState();
+    // getNews();
   }
 
   @override
@@ -62,6 +78,45 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
   @override
   void onWindowFocus() {
     setState(() {});
+  }
+
+  void getNews() async {
+    try {
+      Response resp = await dio.post("$remoteUrl/api/news/info",
+          data: {
+            "curPage": 0,
+            "maxPage": 5,
+            "sortBy": 'create_date',
+            "descending": true,
+            "delete": 0,
+          },
+          options: Options(contentType: "application/json"));
+
+      if (resp.data["status"] == 1) {
+        for (var element in resp.data["msg"]) {
+          setState(() {
+            news.add(element);
+          });
+        }
+      }
+    } on DioError catch (e) {
+      if (e.response != null) {
+        print(e.response!.data);
+        print(e.response!.headers);
+        print(e.response!.requestOptions);
+
+        setState(() {
+          status = e.response!.data;
+        });
+      } else {
+        print(e.requestOptions);
+        print(e.message);
+
+        setState(() {
+          status = e.message!;
+        });
+      }
+    }
   }
 
   @override
@@ -103,103 +158,100 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.all(8),
-                      child: Column(
-                        children: [
-                          Expanded(
-                            child: Card(
-                              color: const Color.fromARGB(120, 0, 0, 0),
-                              child: CarouselSlider(
-                                options: CarouselOptions(
-                                  height: double.infinity,
-                                  autoPlay: true,
-                                  enlargeCenterPage: true,
-                                ),
-                                items: [1, 2, 3, 4, 5].map((i) {
-                                  return Builder(
-                                    builder: (BuildContext context) {
-                                      return Container(
-                                        width: double.infinity,
-                                        decoration: BoxDecoration(
-                                          image: DecorationImage(
-                                            fit: BoxFit.fill,
-                                            image: NetworkImage(
-                                              'http://1.13.22.82:51530/imgs/slide/$i.jpg',
-                                            ),
+                    child: Column(
+                      children: [
+                        Expanded(
+                          child: Card(
+                            color: const Color.fromARGB(120, 0, 0, 0),
+                            child: CarouselSlider(
+                              options: CarouselOptions(
+                                height: double.infinity,
+                                autoPlay: true,
+                                enlargeCenterPage: true,
+                              ),
+                              items: [1, 2, 3, 4, 5].map((i) {
+                                return Builder(
+                                  builder: (BuildContext context) {
+                                    return Container(
+                                      width: double.infinity,
+                                      decoration: const BoxDecoration(
+                                          // image: DecorationImage(
+                                          //   fit: BoxFit.fill,
+                                          // image: NetworkImage(
+                                          //   'http://1.13.22.82:51530/imgs/slide/$i.jpg',
+                                          // ),
+                                          // ),
                                           ),
-                                        ),
-                                        child: Column(
-                                          children: [
-                                            const Spacer(
-                                              flex: 6,
-                                            ),
-                                            Expanded(
-                                              child: Container(
-                                                width: double.infinity,
-                                                decoration: const BoxDecoration(
-                                                  color: Color.fromARGB(
-                                                      120, 0, 0, 0),
-                                                ),
-                                                child: Center(
-                                                  child: Text(
-                                                    '图片标题$i',
-                                                    style: const TextStyle(
-                                                        fontSize: 24,
-                                                        fontFamily: '微软雅黑',
-                                                        color: Colors.white),
-                                                  ),
+                                      child: Column(
+                                        children: [
+                                          const Spacer(
+                                            flex: 6,
+                                          ),
+                                          Expanded(
+                                            child: Container(
+                                              width: double.infinity,
+                                              decoration: const BoxDecoration(
+                                                color: Color.fromARGB(
+                                                    120, 0, 0, 0),
+                                              ),
+                                              child: Center(
+                                                child: Text(
+                                                  '图片标题$i',
+                                                  style: const TextStyle(
+                                                      fontSize: 24,
+                                                      fontFamily: '微软雅黑',
+                                                      color: Colors.white),
                                                 ),
                                               ),
                                             ),
-                                          ],
-                                        ),
-                                      );
-                                    },
-                                  );
-                                }).toList(),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(
-                            height: 8,
-                          ),
-                          Expanded(
-                            child: Card(
-                              color: const Color.fromARGB(120, 0, 0, 0),
-                              child: ListView.builder(
-                                itemCount: entries.length,
-                                itemBuilder: (BuildContext context, int index) {
-                                  return SizedBox(
-                                    height: 50,
-                                    child: Padding(
-                                      padding: const EdgeInsets.fromLTRB(
-                                          20, 0, 20, 0),
-                                      child: Row(
-                                        children: [
-                                          Text(
-                                            '${entries[index]}$index',
-                                            style: const TextStyle(
-                                                color: Colors.white,
-                                                fontFamily: '微软雅黑'),
-                                          ),
-                                          const Spacer(),
-                                          const Text(
-                                            '2023-02-20',
-                                            style: TextStyle(
-                                                color: Colors.white,
-                                                fontFamily: '微软雅黑'),
                                           ),
                                         ],
                                       ),
-                                    ),
-                                  );
-                                },
-                              ),
+                                    );
+                                  },
+                                );
+                              }).toList(),
                             ),
                           ),
-                        ],
-                      ),
+                        ),
+                        const SizedBox(
+                          height: 8,
+                        ),
+                        Expanded(
+                          child: Card(
+                            color: const Color.fromARGB(120, 0, 0, 0),
+                            child: ListView.builder(
+                              itemCount: news.length,
+                              itemBuilder: (BuildContext context, int index) {
+                                return SizedBox(
+                                  height: 50,
+                                  child: Padding(
+                                    padding:
+                                        const EdgeInsets.fromLTRB(20, 0, 20, 0),
+                                    child: Row(
+                                      children: [
+                                        Text(
+                                          '${news[index]['title']}',
+                                          style: const TextStyle(
+                                              color: Colors.white,
+                                              fontFamily: '微软雅黑'),
+                                        ),
+                                        const Spacer(),
+                                        const Text(
+                                          '2023-02-20',
+                                          style: TextStyle(
+                                              color: Colors.white,
+                                              fontFamily: '微软雅黑'),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                   Expanded(
@@ -214,115 +266,135 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
                 color: const Color.fromARGB(120, 0, 0, 0),
                 child: Padding(
                   padding: const EdgeInsets.all(10),
-                  child: Expanded(
-                    child: Row(
-                      children: [
-                        Expanded(
-                          flex: 6,
-                          child: Column(
-                            children: const [
-                              TextField(
-                                style: TextStyle(color: Colors.white),
-                                decoration: InputDecoration(
-                                  border: OutlineInputBorder(),
-                                  enabledBorder: OutlineInputBorder(
-                                    borderSide: BorderSide(color: Colors.white),
-                                  ),
-                                  labelText: '用户名',
-                                  labelStyle: TextStyle(
-                                      color: Colors.white, fontFamily: '微软雅黑'),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        flex: 6,
+                        child: Column(
+                          children: [
+                            TextField(
+                              controller: usernameController,
+                              style: const TextStyle(color: Colors.white),
+                              decoration: const InputDecoration(
+                                border: OutlineInputBorder(),
+                                enabledBorder: OutlineInputBorder(
+                                  borderSide: BorderSide(color: Colors.white),
                                 ),
+                                labelText: '用户名',
+                                labelStyle: TextStyle(
+                                    color: Colors.white, fontFamily: '微软雅黑'),
                               ),
-                              SizedBox(
-                                height: 8,
-                              ),
-                              TextField(
-                                style: TextStyle(color: Colors.white),
-                                obscureText: true,
-                                decoration: InputDecoration(
-                                  border: OutlineInputBorder(),
-                                  enabledBorder: OutlineInputBorder(
-                                    borderSide: BorderSide(color: Colors.white),
-                                  ),
-                                  labelText: '密码',
-                                  labelStyle: TextStyle(
-                                      color: Colors.white, fontFamily: '微软雅黑'),
+                            ),
+                            const SizedBox(
+                              height: 8,
+                            ),
+                            TextField(
+                              controller: passwordController,
+                              style: const TextStyle(color: Colors.white),
+                              obscureText: true,
+                              decoration: const InputDecoration(
+                                border: OutlineInputBorder(),
+                                enabledBorder: OutlineInputBorder(
+                                  borderSide: BorderSide(color: Colors.white),
                                 ),
+                                labelText: '密码',
+                                labelStyle: TextStyle(
+                                    color: Colors.white, fontFamily: '微软雅黑'),
                               ),
-                            ],
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(
+                        width: 8,
+                      ),
+                      SizedBox(
+                        width: 120,
+                        height: double.infinity,
+                        child: ElevatedButton(
+                          style: const ButtonStyle(
+                            backgroundColor: MaterialStatePropertyAll<Color>(
+                                Color.fromARGB(255, 255, 152, 0)),
                           ),
-                        ),
-                        const SizedBox(
-                          width: 8,
-                        ),
-                        SizedBox(
-                          width: 120,
-                          height: double.infinity,
-                          child: ElevatedButton(
-                            style: const ButtonStyle(
-                              backgroundColor: MaterialStatePropertyAll<Color>(
-                                  Color.fromARGB(255, 255, 0, 255)),
-                            ),
-                            child: const Text(
-                              "设置",
-                              style:
-                                  TextStyle(fontSize: 24, fontFamily: '微软雅黑'),
-                            ),
-                            onPressed: () => {},
+                          child: const Text(
+                            "设置",
+                            style: TextStyle(fontSize: 24, fontFamily: '微软雅黑'),
                           ),
+                          onPressed: () {
+                            SmartDialog.show(builder: (context) {
+                              return Container(
+                                height: 600,
+                                width: 800,
+                                decoration: BoxDecoration(
+                                  color: Colors.black,
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                alignment: Alignment.center,
+                                child: const Text('easy custom dialog',
+                                    style: TextStyle(color: Colors.white)),
+                              );
+                            });
+                          },
                         ),
-                        const SizedBox(
-                          width: 8,
-                        ),
-                        SizedBox(
-                          width: 120,
-                          height: double.infinity,
-                          child: ElevatedButton(
-                            style: const ButtonStyle(
-                              backgroundColor: MaterialStatePropertyAll<Color>(
-                                  Colors.amberAccent),
-                            ),
-                            child: const Text(
-                              "注册",
-                              style:
-                                  TextStyle(fontSize: 24, fontFamily: '微软雅黑'),
-                            ),
-                            onPressed: () => {},
+                      ),
+                      const SizedBox(
+                        width: 8,
+                      ),
+                      SizedBox(
+                        width: 120,
+                        height: double.infinity,
+                        child: ElevatedButton(
+                          style: const ButtonStyle(
+                            backgroundColor: MaterialStatePropertyAll<Color>(
+                                Color.fromARGB(255, 233, 30, 99)),
                           ),
-                        ),
-                        const SizedBox(
-                          width: 8,
-                        ),
-                        SizedBox(
-                          width: 120,
-                          height: double.infinity,
-                          child: ElevatedButton(
-                            child: const Text(
-                              "登录",
-                              style:
-                                  TextStyle(fontSize: 24, fontFamily: '微软雅黑'),
-                            ),
-                            onPressed: () => {},
+                          child: const Text(
+                            "注册",
+                            style: TextStyle(fontSize: 24, fontFamily: '微软雅黑'),
                           ),
+                          onPressed: () {
+                            if (usernameController.value.text.isEmpty ||
+                                passwordController.value.text.isEmpty) {
+                              SmartDialog.showToast("用户名或密码不能为空");
+                            }
+                          },
                         ),
-                      ],
-                    ),
+                      ),
+                      const SizedBox(
+                        width: 8,
+                      ),
+                      SizedBox(
+                        width: 120,
+                        height: double.infinity,
+                        child: ElevatedButton(
+                          child: const Text(
+                            "登录",
+                            style: TextStyle(fontSize: 24, fontFamily: '微软雅黑'),
+                          ),
+                          onPressed: () {
+                            if (usernameController.value.text.isEmpty ||
+                                passwordController.value.text.isEmpty) {
+                              SmartDialog.showToast("用户名或密码不能为空");
+                            }
+                          },
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
             ),
-            const SizedBox(
+            SizedBox(
               width: double.infinity,
               height: 45,
               child: Card(
-                color: Color.fromARGB(120, 0, 0, 0),
+                color: const Color.fromARGB(120, 0, 0, 0),
                 child: Padding(
-                  padding: EdgeInsets.all(8),
-                  child: Expanded(
-                    child: Text(
-                      "正在检查更新...",
-                      style: TextStyle(color: Colors.white, fontFamily: '微软雅黑'),
-                    ),
+                  padding: const EdgeInsets.all(8),
+                  child: Text(
+                    status,
+                    style: const TextStyle(
+                        color: Colors.white, fontFamily: '微软雅黑'),
                   ),
                 ),
               ),

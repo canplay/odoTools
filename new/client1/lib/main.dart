@@ -1,8 +1,13 @@
+import 'dart:ffi' as ffi;
+import 'dart:io';
+
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:window_manager/window_manager.dart';
+import 'package:ffi/ffi.dart';
+import 'package:win32/win32.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -45,7 +50,8 @@ class MyHomePage extends StatefulWidget {
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> with WindowListener {
+class _MyHomePageState extends State<MyHomePage>
+    with WindowListener, SingleTickerProviderStateMixin {
   final remoteUrl = "http://1.13.22.82:51530";
 
   Dio dio = Dio(
@@ -59,19 +65,48 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
 
   String status = "正在检查网络链接...";
 
-  TextEditingController usernameController = TextEditingController();
-  TextEditingController passwordController = TextEditingController();
+  late TextEditingController usernameController;
+  late TextEditingController passwordController;
+
+  late TabController tabController;
+  List<Tab> myTabs = <Tab>[
+    Tab(
+      child: const Text(
+        "登录器",
+        style: TextStyle(fontSize: 24, fontFamily: '微软雅黑'),
+      ),
+    ),
+    Tab(
+      child: const Text(
+        "游戏",
+        style: TextStyle(fontSize: 24, fontFamily: '微软雅黑'),
+      ),
+    ),
+    Tab(
+      child: const Text(
+        "其他",
+        style: TextStyle(fontSize: 24, fontFamily: '微软雅黑'),
+      ),
+    ),
+  ];
 
   @override
   void initState() {
     windowManager.addListener(this);
     super.initState();
+    usernameController = TextEditingController();
+    passwordController = TextEditingController();
+    tabController = TabController(vsync: this, length: myTabs.length);
+    regProtocol();
     // getNews();
   }
 
   @override
   void dispose() {
     windowManager.removeListener(this);
+    usernameController.dispose();
+    passwordController.dispose();
+    tabController.dispose();
     super.dispose();
   }
 
@@ -116,6 +151,123 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
           status = e.message!;
         });
       }
+    }
+  }
+
+  void regProtocol() {
+    var hKey = calloc<HANDLE>();
+
+    try {
+      if (RegCreateKey(
+              HKEY_CLASSES_ROOT, "BDOLauncher".toNativeUtf16(), hKey) !=
+          ERROR_SUCCESS) {
+        throw Exception("Can't create registry key 'BDOLauncher'");
+      }
+
+      var reg = "\"${Directory.current.path}\\launcher.exe\"".toNativeUtf16();
+      if (RegSetKeyValue(hKey.value, "".toNativeUtf16(),
+              "URL Protocol".toNativeUtf16(), REG_SZ, reg, reg.length * 2) !=
+          ERROR_SUCCESS) {
+        throw Exception("Can't set registry key 'URL Protocol'");
+      }
+
+      reg = "BOO Launcher Protocol".toNativeUtf16();
+      if (RegSetValue(
+              hKey.value, "".toNativeUtf16(), REG_SZ, reg, reg.length) !=
+          ERROR_SUCCESS) {
+        throw Exception("Can't set registry key 'BOO Launcher Protocol'");
+      }
+
+      RegCloseKey(hKey.value);
+      free(hKey);
+
+      hKey = calloc<HANDLE>();
+
+      if (RegCreateKey(HKEY_CLASSES_ROOT,
+              "BDOLauncher\\DefaultIcon".toNativeUtf16(), hKey) !=
+          ERROR_SUCCESS) {
+        throw Exception("Can't create registry key 'BDOLauncher\\DefaultIcon'");
+      }
+
+      reg = "\"${Directory.current.path}\\launcher.exe\",0".toNativeUtf16();
+      if (RegSetValue(
+              hKey.value, "".toNativeUtf16(), REG_SZ, reg, reg.length) !=
+          ERROR_SUCCESS) {
+        throw Exception("Can't set registry key 'BOO Launcher Protocol'");
+      }
+
+      RegCloseKey(hKey.value);
+      free(hKey);
+
+      hKey = calloc<HANDLE>();
+
+      if (RegCreateKey(HKEY_CLASSES_ROOT,
+              "BDOLauncher\\shell\\open\\command".toNativeUtf16(), hKey) !=
+          ERROR_SUCCESS) {
+        throw Exception("Can't create registry key 'BDOLauncher\\DefaultIcon'");
+      }
+
+      reg =
+          "\"${Directory.current.path}\\launcher.exe\" \"%1\"".toNativeUtf16();
+      if (RegSetValue(
+              hKey.value, "".toNativeUtf16(), REG_SZ, reg, reg.length) !=
+          ERROR_SUCCESS) {
+        throw Exception("Can't set registry key 'BOO Launcher Protocol'");
+      }
+    } finally {
+      free(hKey);
+    }
+  }
+
+  void runGame(String username, String password) {
+    SmartDialog.showLoading(
+        msg: "正在启动游戏...", displayTime: const Duration(seconds: 10));
+
+    final r = ShellExecute(
+        0,
+        "open".toNativeUtf16(),
+        "${Directory.current.parent.path}\\bin64\\BlackDesert64.exe"
+            .toNativeUtf16(),
+        "$username,$password".toNativeUtf16(),
+        "${Directory.current.parent.path}\\bin64".toNativeUtf16(),
+        SW_SHOW);
+
+    switch (r) {
+      case 0:
+        SmartDialog.dismiss();
+        SmartDialog.showToast("启动游戏失败，内存不足");
+        break;
+      case 2:
+        SmartDialog.dismiss();
+        SmartDialog.showToast("启动游戏失败，文件名错误");
+        break;
+      case 3:
+        SmartDialog.dismiss();
+        SmartDialog.showToast("启动游戏失败，文件夹路径错误");
+        break;
+      case 11:
+        SmartDialog.dismiss();
+        SmartDialog.showToast("启动游戏失败，执行文件无效");
+        break;
+      case 26:
+        SmartDialog.dismiss();
+        SmartDialog.showToast("启动游戏失败，共享错误");
+        break;
+      case 27:
+        SmartDialog.dismiss();
+        SmartDialog.showToast("启动游戏失败，文件名不完全或无效");
+        break;
+      case 28:
+        SmartDialog.dismiss();
+        SmartDialog.showToast("启动游戏失败，超时");
+        break;
+      case 31:
+        SmartDialog.dismiss();
+        SmartDialog.showToast("启动游戏失败，没有关联的启动程序");
+        break;
+      default:
+        SmartDialog.dismiss();
+        SmartDialog.showToast("启动游戏失败");
     }
   }
 
@@ -321,19 +473,47 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
                             style: TextStyle(fontSize: 24, fontFamily: '微软雅黑'),
                           ),
                           onPressed: () {
-                            SmartDialog.show(builder: (context) {
-                              return Container(
-                                height: 600,
-                                width: 800,
-                                decoration: BoxDecoration(
-                                  color: Colors.black,
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                alignment: Alignment.center,
-                                child: const Text('easy custom dialog',
-                                    style: TextStyle(color: Colors.white)),
-                              );
-                            });
+                            SmartDialog.show(
+                              builder: (context) {
+                                return Container(
+                                  height: 600,
+                                  width: 800,
+                                  decoration: BoxDecoration(
+                                    color: const Color.fromARGB(
+                                        250, 255, 255, 255),
+                                    borderRadius: BorderRadius.circular(5),
+                                  ),
+                                  child: Column(
+                                    children: [
+                                      Expanded(
+                                        child: Card(
+                                          color: Colors.black,
+                                          child: TabBar(
+                                            controller: tabController,
+                                            tabs: myTabs,
+                                          ),
+                                        ),
+                                      ),
+                                      SizedBox(
+                                        height: 550,
+                                        child: TabBarView(
+                                          controller: tabController,
+                                          children: myTabs.map((Tab tab) {
+                                            return Center(
+                                              child: Text(
+                                                'This is ${tab.text} tab',
+                                                style: const TextStyle(
+                                                    fontSize: 36),
+                                              ),
+                                            );
+                                          }).toList(),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              },
+                            );
                           },
                         ),
                       ),
@@ -356,6 +536,7 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
                             if (usernameController.value.text.isEmpty ||
                                 passwordController.value.text.isEmpty) {
                               SmartDialog.showToast("用户名或密码不能为空");
+                              return;
                             }
                           },
                         ),
@@ -375,7 +556,11 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
                             if (usernameController.value.text.isEmpty ||
                                 passwordController.value.text.isEmpty) {
                               SmartDialog.showToast("用户名或密码不能为空");
+                              return;
                             }
+
+                            runGame(usernameController.value.text,
+                                passwordController.value.text);
                           },
                         ),
                       ),

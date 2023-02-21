@@ -40,6 +40,8 @@ dependencies:
   package_info_plus:
   version:
   carousel_slider:
+  win32:
+  ffi:
 
 dev_dependencies:
   flutter_test:

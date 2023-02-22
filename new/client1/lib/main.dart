@@ -70,20 +70,20 @@ class _MyHomePageState extends State<MyHomePage>
 
   late TabController tabController;
   List<Tab> myTabs = <Tab>[
-    Tab(
-      child: const Text(
+    const Tab(
+      child: Text(
         "登录器",
         style: TextStyle(fontSize: 24, fontFamily: '微软雅黑'),
       ),
     ),
-    Tab(
-      child: const Text(
+    const Tab(
+      child: Text(
         "游戏",
         style: TextStyle(fontSize: 24, fontFamily: '微软雅黑'),
       ),
     ),
-    Tab(
-      child: const Text(
+    const Tab(
+      child: Text(
         "其他",
         style: TextStyle(fontSize: 24, fontFamily: '微软雅黑'),
       ),
@@ -326,14 +326,14 @@ class _MyHomePageState extends State<MyHomePage>
                                   builder: (BuildContext context) {
                                     return Container(
                                       width: double.infinity,
-                                      decoration: const BoxDecoration(
-                                          // image: DecorationImage(
-                                          //   fit: BoxFit.fill,
-                                          // image: NetworkImage(
-                                          //   'http://1.13.22.82:51530/imgs/slide/$i.jpg',
-                                          // ),
-                                          // ),
+                                      decoration: BoxDecoration(
+                                        image: DecorationImage(
+                                          fit: BoxFit.fill,
+                                          image: NetworkImage(
+                                            'http://1.13.22.82:51530/imgs/slide/$i.jpg',
                                           ),
+                                        ),
+                                      ),
                                       child: Column(
                                         children: [
                                           const Spacer(
